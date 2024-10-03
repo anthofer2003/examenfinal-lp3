@@ -11,7 +11,7 @@ Cargos
     <!-- tarjeta -->
     <div class="card">
       <div class="card-header">
-        <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
+        <button type="button" class="btn btn-warning" id="btnAgregar">Agregar</button>
       </div>
       <div class="card-body">
         <table class="table table-striped" id="tbl">
@@ -64,7 +64,7 @@ Cargos
 
           <!-- Modal footer -->
           <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
+            <button type="button" class="btn btn-warning" id="btnGuardar">Guardar</button>
             <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
           </div>
 
@@ -97,7 +97,7 @@ Cargos
         { data: 'numero_de_cedula' },
         { data: 'cargo' },
         { data: function(row) {
-            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
+            return `<button type="button" name="btn_editar" class="btn btn-warning" data-id="${row.id}">Editar</button>
                     <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
           }
         }
