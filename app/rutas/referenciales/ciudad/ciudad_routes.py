@@ -12,8 +12,8 @@ def ciudadIndex():
 def ciudadAgregar():
     return render_template('ciudad-agregar.html')
 
+# REST
 @ciumod.route('/get-ciudades')
 def getCiudades():
     ciudao = CiudadDao()
     return jsonify(ciudao.getCiudades())
-
