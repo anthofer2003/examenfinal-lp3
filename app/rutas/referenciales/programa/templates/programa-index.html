@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
 {% block titulo %}
-Paises
+Programas
 {% endblock %}
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Paises</h3>
+    <h3>Listar Programas</h3>
 
     <!-- Tarjeta -->
     <div class="card">
@@ -18,8 +18,8 @@ Paises
                 <thead>
                     <tr>
                         <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th>País</th>
+                        <th>Facultad</th>
+                        <th>Duración (meses)</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -43,17 +43,17 @@ Paises
                 <!-- Modal Body -->
                 <div class="modal-body">
                     <div class="form-group">
-                        <input type="hidden" id="txtIdPais">
+                        <input type="hidden" id="txtIdPrograma">
                         <label for="txtNombre">Nombre:</label>
                         <input type="text" class="form-control" placeholder="Ingrese el nombre" id="txtNombre">
                     </div>
                     <div class="form-group">
-                        <label for="txtApellido">Apellido:</label>
-                        <input type="text" class="form-control" placeholder="Ingrese el apellido" id="txtApellido">
+                        <label for="txtFacultad">Facultad:</label>
+                        <input type="text" class="form-control" placeholder="Ingrese la facultad" id="txtFacultad">
                     </div>
                     <div class="form-group">
-                        <label for="txtPais">País:</label>
-                        <input type="text" class="form-control" placeholder="Ingrese el país" id="txtPais">
+                        <label for="txtDuracion">Duración (meses):</label>
+                        <input type="number" class="form-control" placeholder="Ingrese la duración" id="txtDuracion">
                     </div>
                 </div>
 
@@ -85,11 +85,11 @@ Paises
             language: {
                 url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
             },
-            ajax: '/api/v1/paises',
+            ajax: '/api/v1/programas',  // Cambiado a la ruta de programas
             columns: [
                 { data: 'nombre' },
-                { data: 'apellido' },
-                { data: 'pais' },
+                { data: 'facultad' },
+                { data: 'duracion' },
                 { data: function(row) {
                         return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
                                 <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
@@ -101,32 +101,32 @@ Paises
 
     const agregar = () => {
         $('#btnAgregar').on('click', function(){
-            $('#modalTitle').text("Agregar un País");
-            $('#txtIdPais').val("");
+            $('#modalTitle').text("Agregar un Programa");
+            $('#txtIdPrograma').val("");
             $('#txtNombre').val("");
-            $('#txtApellido').val("");
-            $('#txtPais').val("");
+            $('#txtFacultad').val("");
+            $('#txtDuracion').val("");
             $('#modalFormulario').modal();
         });
     }
 
     const guardar = () => {
         $('#btnGuardar').on('click', function() {
-            const idPais = $('#txtIdPais').val();
+            const idPrograma = $('#txtIdPrograma').val();
             const nuevoNombre = $('#txtNombre').val();
-            const nuevoApellido = $('#txtApellido').val();
-            const nuevoPais = $('#txtPais').val();
+            const nuevoFacultad = $('#txtFacultad').val();
+            const nuevaDuracion = $('#txtDuracion').val();
             const tabla = $('#tbl').DataTable();
 
             const data = { 
                 nombre: nuevoNombre, 
-                apellido: nuevoApellido, 
-                pais: nuevoPais 
+                facultad: nuevoFacultad, 
+                duracion: parseInt(nuevaDuracion) // Asegúrate de convertir a número
             };
 
-            if(idPais) {
+            if(idPrograma) {
                 // Update
-                fetch(`/api/v1/paises/${idPais}`, {
+                fetch(`/api/v1/programas/${idPrograma}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -137,16 +137,16 @@ Paises
                 .then(data => {
                     if(data && !data.error && data.success) {
                         tabla.ajax.reload();
-                        Swal.fire("Actualizado", "El país ha sido actualizado correctamente.", "success");
+                        Swal.fire("Actualizado", "El programa ha sido actualizado correctamente.", "success");
                     } else {
                         Swal.fire(data.error);
                     }
                 }).catch(err => {
-                    Swal.fire("Error", "Ocurrió un error al actualizar el país.", "error");
+                    Swal.fire("Error", "Ocurrió un error al actualizar el programa.", "error");
                 });
             } else {
                 // Insert
-                fetch(`/api/v1/paises`, {
+                fetch(`/api/v1/programas`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -157,23 +157,23 @@ Paises
                 .then(data => {
                     if(data && !data.error && data.success) {
                         tabla.ajax.reload();
-                        Swal.fire("Agregado", "El país ha sido agregado correctamente.", "success");
+                        Swal.fire("Agregado", "El programa ha sido agregado correctamente.", "success");
                     } else {
                         Swal.fire(data.error);
                     }
                 }).catch(err => {
-                    Swal.fire("Error", "Ocurrió un error al guardar el país.", "error");
+                    Swal.fire("Error", "Ocurrió un error al guardar el programa.", "error");
                 });
             }
             $('#txtNombre').val("");
-            $('#txtApellido').val("");
-            $('#txtPais').val("");
+            $('#txtFacultad').val("");
+            $('#txtDuracion').val("");
             $('#modalFormulario').modal("hide");
         });
     }
 
     const editar = () => {
-        $('#tbl').on('click', 'button[name="btn_editar"]',function(){
+        $('#tbl').on('click', 'button[name="btn_editar"]', function(){
             Swal.fire({
                 title: "¿Deseas editar este registro?",
                 showCancelButton: true,
@@ -181,12 +181,12 @@ Paises
                 cancelButtonText: `No`
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $('#modalTitle').text("Editar un País");
+                    $('#modalTitle').text("Editar un Programa");
 
-                    const idPais = $(this).data('id');
-                    $('#txtIdPais').val(idPais);
+                    const idPrograma = $(this).data('id');
+                    $('#txtIdPrograma').val(idPrograma);
 
-                    fetch(`/api/v1/paises/${idPais}`, {
+                    fetch(`/api/v1/programas/${idPrograma}`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json'
@@ -195,8 +195,8 @@ Paises
                     .then(resp => resp.json())
                     .then(data => {
                         $('#txtNombre').val(data.data.nombre);
-                        $('#txtApellido').val(data.data.apellido);
-                        $('#txtPais').val(data.data.pais);
+                        $('#txtFacultad').val(data.data.facultad);
+                        $('#txtDuracion').val(data.data.duracion);
                         $('#modalFormulario').modal();
                     });
                 }
@@ -205,8 +205,8 @@ Paises
     }
 
     const eliminar = () => {
-        $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
-            const idPais = $(this).data('id');
+        $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
+            const idPrograma = $(this).data('id');
             Swal.fire({
                 title: "¿Deseas eliminar este registro?",
                 showCancelButton: true,
@@ -214,7 +214,7 @@ Paises
                 cancelButtonText: `No`
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/api/v1/paises/${idPais}`, {
+                    fetch(`/api/v1/programas/${idPrograma}`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json'
@@ -231,7 +231,7 @@ Paises
                             Swal.fire(data.error);
                         }
                     }).catch(err => {
-                        Swal.fire("Error", "Ocurrió un error al eliminar el país.", "error");
+                        Swal.fire("Error", "Ocurrió un error al eliminar el programa.", "error");
                     });
                 }
             });

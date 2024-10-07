@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-
+    
 {% block titulo %}
-Nacionalidades
+Horarios
 {% endblock %}
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Nacionalidades</h3>
+    <h3>Listar Horarios</h3>
 
     <!-- tarjeta -->
     <div class="card">
@@ -17,19 +17,22 @@ Nacionalidades
         <table class="table table-striped" id="tbl">
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Apellido</th>
-              <th>Nacionalidad</th>
+              <th>Curso</th>
+              <th>Profesor</th>
+              <th>Día</th>
+              <th>Hora Inicio</th>
+              <th>Hora Fin</th>
+              <th>Aula</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody></tbody>
-      </table>
+        </table>
       </div>
     </div>
     <!-- /tarjeta -->
 
-    <!-- El formulario -->
+    <!-- Modal para el formulario -->
     <div class="modal" id="modalFormulario">
       <!-- La clase modal-dialog-centered centra el modal -->
       <div class="modal-dialog modal-dialog-centered">
@@ -44,17 +47,24 @@ Nacionalidades
           <!-- Modal body -->
           <div class="modal-body">
             <div class="form-group">
-              <input type="hidden" id="txtIdNacionalidad">
-              <label for="txtNombre">Nombre:</label>
-              <input type="text" class="form-control" placeholder="Ingrese el nombre" id="txtNombre">
-            </div>
-            <div class="form-group">
-              <label for="txtApellido">Apellido:</label>
-              <input type="text" class="form-control" placeholder="Ingrese el apellido" id="txtApellido">
-            </div>
-            <div class="form-group">
-              <label for="txtNacionalidad">Nacionalidad:</label>
-              <input type="text" class="form-control" placeholder="Ingrese la nacionalidad" id="txtNacionalidad">
+              <input type="hidden" id="txtIdHorario">
+              <label for="txtCurso">Curso:</label>
+              <input type="text" class="form-control" id="txtCurso">
+
+              <label for="txtProfesor">Profesor:</label>
+              <input type="text" class="form-control" id="txtProfesor">
+
+              <label for="txtDia">Día:</label>
+              <input type="text" class="form-control" id="txtDia">
+
+              <label for="txtHoraInicio">Hora Inicio:</label>
+              <input type="time" class="form-control" id="txtHoraInicio">
+
+              <label for="txtHoraFin">Hora Fin:</label>
+              <input type="time" class="form-control" id="txtHoraFin">
+
+              <label for="txtAula">Aula:</label>
+              <input type="text" class="form-control" id="txtAula">
             </div>
           </div>
 
@@ -87,11 +97,14 @@ Nacionalidades
       language: {
         url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
       },
-      ajax:'/api/v1/nacionalidades',
+      ajax:'/api/v1/horarios',
       columns: [
-        { data: 'nombre' },
-        { data: 'apellido' },
-        { data: 'nacionalidad' },
+        { data: 'curso' },
+        { data: 'nombre_profesor' },
+        { data: 'dia' },
+        { data: 'hora_inicio' },
+        { data: 'hora_fin' },
+        { data: 'aula' },
         { data: function(row) {
             return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
                     <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`
@@ -103,70 +116,82 @@ Nacionalidades
 
   const agregar = () => {
     $('#btnAgregar').on('click', function(){
-      // Setear un título a modal
-      $('#modalTitle').text("Agregar una Nacionalidad");
-      // inicia ventana modal
-      $('#txtIdNacionalidad').val("");
-      $('#txtNombre').val("");
-      $('#txtApellido').val("");
-      $('#txtNacionalidad').val("");
+      $('#modalTitle').text("Agregar un Horario");
+      $('#txtIdHorario').val("");
+      $('#txtCurso').val("");
+      $('#txtProfesor').val("");
+      $('#txtDia').val("");
+      $('#txtHoraInicio').val("");
+      $('#txtHoraFin').val("");
+      $('#txtAula').val("");
       $('#modalFormulario').modal();
     });
   }
 
   const guardar = () => {
     $('#btnGuardar').on('click', function() {
-      const idNacionalidad = $('#txtIdNacionalidad').val();
-      const nombre = $('#txtNombre').val();
-      const apellido = $('#txtApellido').val();
-      const nacionalidad = $('#txtNacionalidad').val();
+      const idHorario = $('#txtIdHorario').val();
+      const curso = $('#txtCurso').val();
+      const profesor = $('#txtProfesor').val();
+      const dia = $('#txtDia').val();
+      const horaInicio = $('#txtHoraInicio').val();
+      const horaFin = $('#txtHoraFin').val();
+      const aula = $('#txtAula').val();
       const tabla = $('#tbl').DataTable();
 
-      const payload = {
-        nombre: nombre,
-        apellido: apellido,
-        nacionalidad: nacionalidad
-      };
-
-      if(idNacionalidad) {
+      if(idHorario) {
         // update
-        fetch(`/api/v1/nacionalidades/${idNacionalidad}`, {
+        fetch(`/api/v1/horarios/${idHorario}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify(payload)
+          }, body: JSON.stringify({
+            curso: curso,
+            nombre_profesor: profesor,
+            dia: dia,
+            hora_inicio: horaInicio,
+            hora_fin: horaFin,
+            aula: aula
+          })
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "La nacionalidad ha sido actualizada correctamente.", "success");
+            Swal.fire("Actualizado", "El horario ha sido actualizado correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al actualizar la nacionalidad.", "error");
+          Swal.fire("Error", "Ocurrió un error al actualizar el horario.", "error");
         });
       } else {
         // insert
-        fetch(`/api/v1/nacionalidades`, {
+        fetch(`/api/v1/horarios`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify(payload)
+          }, body: JSON.stringify({
+            curso: curso,
+            nombre_profesor: profesor,
+            dia: dia,
+            hora_inicio: horaInicio,
+            hora_fin: horaFin,
+            aula: aula
+          })
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Registrado", "La nacionalidad ha sido agregada correctamente.", "success");
+            Swal.fire("Registrado", "El horario ha sido registrado correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al guardar la nacionalidad.", "error");
+          Swal.fire("Error", "Ocurrió un error al guardar el horario.", "error");
         });
       }
       $('#modalFormulario').modal("hide");
@@ -182,13 +207,12 @@ Nacionalidades
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          $('#modalTitle').text("Editar una Nacionalidad");
+          $('#modalTitle').text("Editar un Horario");
 
-          const idNacionalidad = $(this).data('id');
-          $('#txtIdNacionalidad').val(idNacionalidad);
+          const idHorario = $(this).data('id');
+          $('#txtIdHorario').val(idHorario);
 
-          // Obtener datos del backend
-          fetch(`/api/v1/nacionalidades/${idNacionalidad}`, {
+          fetch(`/api/v1/horarios/${idHorario}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json'
@@ -196,9 +220,12 @@ Nacionalidades
           })
           .then(resp => resp.json())
           .then(data => {
-            $('#txtNombre').val(data.data.nombre);
-            $('#txtApellido').val(data.data.apellido);
-            $('#txtNacionalidad').val(data.data.nacionalidad);
+            $('#txtCurso').val(data.data.curso);
+            $('#txtProfesor').val(data.data.nombre_profesor);
+            $('#txtDia').val(data.data.dia);
+            $('#txtHoraInicio').val(data.data.hora_inicio);
+            $('#txtHoraFin').val(data.data.hora_fin);
+            $('#txtAula').val(data.data.aula);
             $('#modalFormulario').modal();
           });
         }
@@ -208,7 +235,7 @@ Nacionalidades
 
   const eliminar = () => {
     $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
-      const idNacionalidad = $(this).data('id');
+      const idHorario = $(this).data('id');
       Swal.fire({
         title: "¿Deseas eliminar este registro?",
         showCancelButton: true,
@@ -216,7 +243,7 @@ Nacionalidades
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          fetch(`/api/v1/nacionalidades/${idNacionalidad}`, {
+          fetch(`/api/v1/horarios/${idHorario}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json'
@@ -225,19 +252,18 @@ Nacionalidades
           .then(resp => resp.json())
           .then(data => {
             if(data && !data.error && data.success) {
-              const fila =$(this).closest('tr');
+              const fila = $(this).closest('tr');
               const tabla = $('#tbl').DataTable();
               tabla.row(fila).remove().draw();
-              Swal.fire("Eliminado", "", "success");
+              Swal.fire("Eliminado", "", data.success);
             } else {
               Swal.fire(data.error);
             }
           }).catch(err => {
-            Swal.fire("Error", "Ocurrió un error al eliminar la nacionalidad.", "error");
+            Swal.fire("Error", "Ocurrió un error al eliminar el horario.", "error");
           });
         }
       });
-
     });
   }
 

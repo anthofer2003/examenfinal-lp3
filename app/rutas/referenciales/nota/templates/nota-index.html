@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
 {% block titulo %}
-Paises
+Notas
 {% endblock %}
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Paises</h3>
+    <h3>Listar Notas</h3>
 
-    <!-- Tarjeta -->
+    <!-- tarjeta -->
     <div class="card">
         <div class="card-header">
             <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
@@ -17,9 +17,10 @@ Paises
             <table class="table table-striped" id="tbl">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th>País</th>
+                        <th>Nombre Estudiante</th>
+                        <th>Curso</th>
+                        <th>Nota</th>
+                        <th>Fecha Evaluación</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -27,46 +28,49 @@ Paises
             </table>
         </div>
     </div>
-    <!-- /Tarjeta -->
+    <!-- /tarjeta -->
 
-    <!-- Modal Formulario -->
+    <!-- El formulario -->
     <div class="modal" id="modalFormulario">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
                 <!-- Modal Header -->
                 <div class="modal-header">
                     <h4 class="modal-title" id="modalTitle"></h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
 
-                <!-- Modal Body -->
+                <!-- Modal body -->
                 <div class="modal-body">
                     <div class="form-group">
-                        <input type="hidden" id="txtIdPais">
-                        <label for="txtNombre">Nombre:</label>
-                        <input type="text" class="form-control" placeholder="Ingrese el nombre" id="txtNombre">
+                        <input type="hidden" id="txtIdNota">
+                        <label for="txtNombreEstudiante">Nombre Estudiante:</label>
+                        <input type="text" class="form-control" placeholder="Ingrese el nombre del estudiante" id="txtNombreEstudiante" required>
                     </div>
                     <div class="form-group">
-                        <label for="txtApellido">Apellido:</label>
-                        <input type="text" class="form-control" placeholder="Ingrese el apellido" id="txtApellido">
+                        <label for="txtCurso">Curso:</label>
+                        <input type="text" class="form-control" placeholder="Ingrese el curso" id="txtCurso" required>
                     </div>
                     <div class="form-group">
-                        <label for="txtPais">País:</label>
-                        <input type="text" class="form-control" placeholder="Ingrese el país" id="txtPais">
+                        <label for="txtNota">Nota:</label>
+                        <input type="number" step="0.01" class="form-control" placeholder="Ingrese la nota" id="txtNota" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtFechaEvaluacion">Fecha Evaluación:</label>
+                        <input type="date" class="form-control" id="txtFechaEvaluacion" required>
                     </div>
                 </div>
 
-                <!-- Modal Footer -->
+                <!-- Modal footer -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
                 </div>
+
             </div>
         </div>
     </div>
 
-    <!-- Alerta de éxito -->
     <div class="row mt-4 d-none" id="rowAlerta">
         <div class="col col-md-12">
             <div class="alert alert-success">
@@ -85,136 +89,133 @@ Paises
             language: {
                 url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
             },
-            ajax: '/api/v1/paises',
+            ajax: '/api/v1/notas',
             columns: [
-                { data: 'nombre' },
-                { data: 'apellido' },
-                { data: 'pais' },
+                { data: 'nombre_estudiante' },
+                { data: 'curso' },
+                { data: 'nota' },
+                { data: 'fecha_evaluacion' },
                 { data: function(row) {
-                        return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
-                                <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
-                    }
-                }
+                    return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
+                            <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
+                }}
             ]
         });
     }
 
     const agregar = () => {
         $('#btnAgregar').on('click', function(){
-            $('#modalTitle').text("Agregar un País");
-            $('#txtIdPais').val("");
-            $('#txtNombre').val("");
-            $('#txtApellido').val("");
-            $('#txtPais').val("");
+            // Setear un título a modal
+            $('#modalTitle').text("Agregar Nota");
+            // iniciar ventana modal
+            $('#txtIdNota').val("");
+            $('#txtNombreEstudiante').val("");
+            $('#txtCurso').val("");
+            $('#txtNota').val("");
+            $('#txtFechaEvaluacion').val("");
             $('#modalFormulario').modal();
         });
     }
 
     const guardar = () => {
         $('#btnGuardar').on('click', function() {
-            const idPais = $('#txtIdPais').val();
-            const nuevoNombre = $('#txtNombre').val();
-            const nuevoApellido = $('#txtApellido').val();
-            const nuevoPais = $('#txtPais').val();
+            const idNota = $('#txtIdNota').val();
+            const nombreEstudiante = $('#txtNombreEstudiante').val();
+            const curso = $('#txtCurso').val();
+            const nota = $('#txtNota').val();
+            const fechaEvaluacion = $('#txtFechaEvaluacion').val();
             const tabla = $('#tbl').DataTable();
 
-            const data = { 
-                nombre: nuevoNombre, 
-                apellido: nuevoApellido, 
-                pais: nuevoPais 
-            };
-
-            if(idPais) {
-                // Update
-                fetch(`/api/v1/paises/${idPais}`, {
+            if(idNota) {
+                // update
+                fetch(`/api/v1/notas/${idNota}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
-                    }, 
-                    body: JSON.stringify(data)
+                    }, body: JSON.stringify({
+                        nombre_estudiante: nombreEstudiante,
+                        curso: curso,
+                        nota: nota,
+                        fecha_evaluacion: fechaEvaluacion
+                    })
                 })
                 .then(resp => resp.json())
                 .then(data => {
                     if(data && !data.error && data.success) {
                         tabla.ajax.reload();
-                        Swal.fire("Actualizado", "El país ha sido actualizado correctamente.", "success");
+                        Swal.fire("Actualizado", "La nota ha sido actualizada correctamente.", "success");
                     } else {
                         Swal.fire(data.error);
                     }
                 }).catch(err => {
-                    Swal.fire("Error", "Ocurrió un error al actualizar el país.", "error");
+                    console.error(err);
+                    Swal.fire("Error", "Ocurrió un error al actualizar la nota.", "error");
                 });
             } else {
-                // Insert
-                fetch(`/api/v1/paises`, {
+                // insert
+                fetch(`/api/v1/notas`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    }, 
-                    body: JSON.stringify(data)
+                    }, body: JSON.stringify({
+                        nombre_estudiante: nombreEstudiante,
+                        curso: curso,
+                        nota: nota,
+                        fecha_evaluacion: fechaEvaluacion
+                    })
                 })
                 .then(resp => resp.json())
                 .then(data => {
                     if(data && !data.error && data.success) {
                         tabla.ajax.reload();
-                        Swal.fire("Agregado", "El país ha sido agregado correctamente.", "success");
+                        Swal.fire("Agregado", "La nota ha sido agregada correctamente.", "success");
                     } else {
                         Swal.fire(data.error);
                     }
                 }).catch(err => {
-                    Swal.fire("Error", "Ocurrió un error al guardar el país.", "error");
+                    console.error(err);
+                    Swal.fire("Error", "Ocurrió un error al guardar la nota.", "error");
                 });
             }
-            $('#txtNombre').val("");
-            $('#txtApellido').val("");
-            $('#txtPais').val("");
             $('#modalFormulario').modal("hide");
         });
     }
 
     const editar = () => {
-        $('#tbl').on('click', 'button[name="btn_editar"]',function(){
-            Swal.fire({
-                title: "¿Deseas editar este registro?",
-                showCancelButton: true,
-                confirmButtonText: "Si",
-                cancelButtonText: `No`
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $('#modalTitle').text("Editar un País");
+        $('#tbl').on('click', 'button[name="btn_editar"]', function(){
+            const idNota = $(this).data('id');
+            $('#modalTitle').text("Editar Nota");
 
-                    const idPais = $(this).data('id');
-                    $('#txtIdPais').val(idPais);
-
-                    fetch(`/api/v1/paises/${idPais}`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(resp => resp.json())
-                    .then(data => {
-                        $('#txtNombre').val(data.data.nombre);
-                        $('#txtApellido').val(data.data.apellido);
-                        $('#txtPais').val(data.data.pais);
-                        $('#modalFormulario').modal();
-                    });
+            // Obtener la nota del backend
+            fetch(`/api/v1/notas/${idNota}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                $('#txtIdNota').val(data.data.id);
+                $('#txtNombreEstudiante').val(data.data.nombre_estudiante);
+                $('#txtCurso').val(data.data.curso);
+                $('#txtNota').val(data.data.nota);
+                $('#txtFechaEvaluacion').val(data.data.fecha_evaluacion);
+                $('#modalFormulario').modal();
             });
         });
     }
 
     const eliminar = () => {
-        $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
-            const idPais = $(this).data('id');
+        $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
+            const idNota = $(this).data('id');
             Swal.fire({
                 title: "¿Deseas eliminar este registro?",
                 showCancelButton: true,
                 confirmButtonText: "Si",
-                cancelButtonText: `No`
+                cancelButtonText: "No"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/api/v1/paises/${idPais}`, {
+                    fetch(`/api/v1/notas/${idNota}`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json'
@@ -226,12 +227,12 @@ Paises
                             const fila = $(this).closest('tr');
                             const tabla = $('#tbl').DataTable();
                             tabla.row(fila).remove().draw();
-                            Swal.fire("Eliminado", "", "success");
+                            Swal.fire("Eliminado", "", data.success);
                         } else {
                             Swal.fire(data.error);
                         }
                     }).catch(err => {
-                        Swal.fire("Error", "Ocurrió un error al eliminar el país.", "error");
+                        Swal.fire("Error", "Ocurrió un error al eliminar la nota.", "error");
                     });
                 }
             });

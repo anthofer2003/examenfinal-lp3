@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
 {% block titulo %}
-Nacionalidades
+Matrículas
 {% endblock %}
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Nacionalidades</h3>
+    <h3>Listar Matrículas</h3>
 
     <!-- tarjeta -->
     <div class="card">
@@ -17,9 +17,10 @@ Nacionalidades
         <table class="table table-striped" id="tbl">
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Apellido</th>
-              <th>Nacionalidad</th>
+              <th>Nombre Estudiante</th>
+              <th>Curso</th>
+              <th>Fecha Matrícula</th>
+              <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -31,7 +32,6 @@ Nacionalidades
 
     <!-- El formulario -->
     <div class="modal" id="modalFormulario">
-      <!-- La clase modal-dialog-centered centra el modal -->
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
@@ -44,17 +44,21 @@ Nacionalidades
           <!-- Modal body -->
           <div class="modal-body">
             <div class="form-group">
-              <input type="hidden" id="txtIdNacionalidad">
-              <label for="txtNombre">Nombre:</label>
-              <input type="text" class="form-control" placeholder="Ingrese el nombre" id="txtNombre">
+              <input type="hidden" id="txtIdMatricula">
+              <label for="txtNombreEstudiante">Nombre Estudiante:</label>
+              <input type="text" class="form-control" placeholder="Ingrese el nombre del estudiante" id="txtNombreEstudiante">
             </div>
             <div class="form-group">
-              <label for="txtApellido">Apellido:</label>
-              <input type="text" class="form-control" placeholder="Ingrese el apellido" id="txtApellido">
+              <label for="txtCurso">Curso:</label>
+              <input type="text" class="form-control" placeholder="Ingrese el curso" id="txtCurso">
             </div>
             <div class="form-group">
-              <label for="txtNacionalidad">Nacionalidad:</label>
-              <input type="text" class="form-control" placeholder="Ingrese la nacionalidad" id="txtNacionalidad">
+              <label for="txtFechaMatricula">Fecha Matrícula:</label>
+              <input type="date" class="form-control" id="txtFechaMatricula">
+            </div>
+            <div class="form-group">
+              <label for="txtEstado">Estado:</label>
+              <input type="text" class="form-control" placeholder="Ingrese el estado" id="txtEstado">
             </div>
           </div>
 
@@ -87,14 +91,15 @@ Nacionalidades
       language: {
         url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
       },
-      ajax:'/api/v1/nacionalidades',
+      ajax:'/api/v1/matriculas',
       columns: [
-        { data: 'nombre' },
-        { data: 'apellido' },
-        { data: 'nacionalidad' },
+        { data: 'nombre_estudiante' },
+        { data: 'curso' },
+        { data: 'fecha_matricula' },
+        { data: 'estado' },
         { data: function(row) {
             return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
-                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`
+                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
           }
         }
       ]
@@ -103,70 +108,66 @@ Nacionalidades
 
   const agregar = () => {
     $('#btnAgregar').on('click', function(){
-      // Setear un título a modal
-      $('#modalTitle').text("Agregar una Nacionalidad");
-      // inicia ventana modal
-      $('#txtIdNacionalidad').val("");
-      $('#txtNombre').val("");
-      $('#txtApellido').val("");
-      $('#txtNacionalidad').val("");
+      $('#modalTitle').text("Agregar una Matrícula");
+      $('#txtIdMatricula').val("");
+      $('#txtNombreEstudiante').val("");
+      $('#txtCurso').val("");
+      $('#txtFechaMatricula').val("");
+      $('#txtEstado').val("");
       $('#modalFormulario').modal();
     });
   }
 
   const guardar = () => {
     $('#btnGuardar').on('click', function() {
-      const idNacionalidad = $('#txtIdNacionalidad').val();
-      const nombre = $('#txtNombre').val();
-      const apellido = $('#txtApellido').val();
-      const nacionalidad = $('#txtNacionalidad').val();
+      const idMatricula = $('#txtIdMatricula').val();
+      const nombreEstudiante = $('#txtNombreEstudiante').val();
+      const curso = $('#txtCurso').val();
+      const fechaMatricula = $('#txtFechaMatricula').val();
+      const estado = $('#txtEstado').val();
       const tabla = $('#tbl').DataTable();
 
-      const payload = {
-        nombre: nombre,
-        apellido: apellido,
-        nacionalidad: nacionalidad
-      };
-
-      if(idNacionalidad) {
+      if(idMatricula) {
         // update
-        fetch(`/api/v1/nacionalidades/${idNacionalidad}`, {
+        fetch(`/api/v1/matriculas/${idMatricula}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify(payload)
+          }, 
+          body: JSON.stringify({ nombre_estudiante: nombreEstudiante, curso: curso, fecha_matricula: fechaMatricula, estado: estado })
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "La nacionalidad ha sido actualizada correctamente.", "success");
+            Swal.fire("Actualizado", "La matrícula ha sido actualizada correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al actualizar la nacionalidad.", "error");
+          Swal.fire("Error", "Ocurrió un error al actualizar la matrícula.", "error");
         });
       } else {
         // insert
-        fetch(`/api/v1/nacionalidades`, {
+        fetch(`/api/v1/matriculas`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify(payload)
+          }, 
+          body: JSON.stringify({ nombre_estudiante: nombreEstudiante, curso: curso, fecha_matricula: fechaMatricula, estado: estado })
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Registrado", "La nacionalidad ha sido agregada correctamente.", "success");
+            Swal.fire("Agregado", "La matrícula ha sido agregada correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al guardar la nacionalidad.", "error");
+          Swal.fire("Error", "Ocurrió un error al guardar la matrícula.", "error");
         });
       }
       $('#modalFormulario').modal("hide");
@@ -174,41 +175,31 @@ Nacionalidades
   }
 
   const editar = () => {
-    $('#tbl').on('click', 'button[name="btn_editar"]',function(){
-      Swal.fire({
-        title: "¿Deseas editar este registro?",
-        showCancelButton: true,
-        confirmButtonText: "Si",
-        cancelButtonText: `No`
-      }).then((result) => {
-        if (result.isConfirmed) {
-          $('#modalTitle').text("Editar una Nacionalidad");
+    $('#tbl').on('click', 'button[name="btn_editar"]', function(){
+      const idMatricula = $(this).data('id');
+      $('#modalTitle').text("Editar una Matrícula");
 
-          const idNacionalidad = $(this).data('id');
-          $('#txtIdNacionalidad').val(idNacionalidad);
-
-          // Obtener datos del backend
-          fetch(`/api/v1/nacionalidades/${idNacionalidad}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          })
-          .then(resp => resp.json())
-          .then(data => {
-            $('#txtNombre').val(data.data.nombre);
-            $('#txtApellido').val(data.data.apellido);
-            $('#txtNacionalidad').val(data.data.nacionalidad);
-            $('#modalFormulario').modal();
-          });
+      fetch(`/api/v1/matriculas/${idMatricula}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
         }
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        $('#txtIdMatricula').val(idMatricula);
+        $('#txtNombreEstudiante').val(data.data.nombre_estudiante);
+        $('#txtCurso').val(data.data.curso);
+        $('#txtFechaMatricula').val(data.data.fecha_matricula);
+        $('#txtEstado').val(data.data.estado);
+        $('#modalFormulario').modal();
       });
     });
   }
 
   const eliminar = () => {
-    $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
-      const idNacionalidad = $(this).data('id');
+    $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
+      const idMatricula = $(this).data('id');
       Swal.fire({
         title: "¿Deseas eliminar este registro?",
         showCancelButton: true,
@@ -216,7 +207,7 @@ Nacionalidades
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          fetch(`/api/v1/nacionalidades/${idNacionalidad}`, {
+          fetch(`/api/v1/matriculas/${idMatricula}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json'
@@ -225,19 +216,18 @@ Nacionalidades
           .then(resp => resp.json())
           .then(data => {
             if(data && !data.error && data.success) {
-              const fila =$(this).closest('tr');
+              const fila = $(this).closest('tr');
               const tabla = $('#tbl').DataTable();
               tabla.row(fila).remove().draw();
-              Swal.fire("Eliminado", "", "success");
+              Swal.fire("Eliminado", "La matrícula ha sido eliminada.", "success");
             } else {
               Swal.fire(data.error);
             }
           }).catch(err => {
-            Swal.fire("Error", "Ocurrió un error al eliminar la nacionalidad.", "error");
+            Swal.fire("Error", "Ocurrió un error al eliminar la matrícula.", "error");
           });
         }
       });
-
     });
   }
 

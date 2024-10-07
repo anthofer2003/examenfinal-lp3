@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
 {% block titulo %}
-Nacionalidades
+Evaluaciones
 {% endblock %}
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Nacionalidades</h3>
+    <h3>Listar Evaluaciones</h3>
 
     <!-- tarjeta -->
     <div class="card">
@@ -18,8 +18,8 @@ Nacionalidades
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>Apellido</th>
-              <th>Nacionalidad</th>
+              <th>Tipo de Evaluación</th>
+              <th>Fecha</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -44,17 +44,17 @@ Nacionalidades
           <!-- Modal body -->
           <div class="modal-body">
             <div class="form-group">
-              <input type="hidden" id="txtIdNacionalidad">
+              <input type="hidden" id="txtIdEvaluacion">
               <label for="txtNombre">Nombre:</label>
-              <input type="text" class="form-control" placeholder="Ingrese el nombre" id="txtNombre">
+              <input type="text" class="form-control" placeholder="Ingrese el nombre de la evaluación" id="txtNombre">
             </div>
             <div class="form-group">
-              <label for="txtApellido">Apellido:</label>
-              <input type="text" class="form-control" placeholder="Ingrese el apellido" id="txtApellido">
+              <label for="txtTipoEvaluacion">Tipo de Evaluación:</label>
+              <input type="text" class="form-control" placeholder="Ingrese el tipo de evaluación" id="txtTipoEvaluacion">
             </div>
             <div class="form-group">
-              <label for="txtNacionalidad">Nacionalidad:</label>
-              <input type="text" class="form-control" placeholder="Ingrese la nacionalidad" id="txtNacionalidad">
+              <label for="txtFecha">Fecha:</label>
+              <input type="date" class="form-control" id="txtFecha">
             </div>
           </div>
 
@@ -87,11 +87,11 @@ Nacionalidades
       language: {
         url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
       },
-      ajax:'/api/v1/nacionalidades',
+      ajax:'/api/v1/evaluaciones',
       columns: [
         { data: 'nombre' },
-        { data: 'apellido' },
-        { data: 'nacionalidad' },
+        { data: 'tipo_evaluacion' },
+        { data: 'fecha' },
         { data: function(row) {
             return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
                     <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`
@@ -104,77 +104,75 @@ Nacionalidades
   const agregar = () => {
     $('#btnAgregar').on('click', function(){
       // Setear un título a modal
-      $('#modalTitle').text("Agregar una Nacionalidad");
+      $('#modalTitle').text("Agregar una Evaluación");
       // inicia ventana modal
-      $('#txtIdNacionalidad').val("");
+      $('#txtIdEvaluacion').val("");
       $('#txtNombre').val("");
-      $('#txtApellido').val("");
-      $('#txtNacionalidad').val("");
+      $('#txtTipoEvaluacion').val("");
+      $('#txtFecha').val("");
       $('#modalFormulario').modal();
     });
   }
 
   const guardar = () => {
     $('#btnGuardar').on('click', function() {
-      const idNacionalidad = $('#txtIdNacionalidad').val();
+      const idEvaluacion = $('#txtIdEvaluacion').val();
       const nombre = $('#txtNombre').val();
-      const apellido = $('#txtApellido').val();
-      const nacionalidad = $('#txtNacionalidad').val();
+      const tipoEvaluacion = $('#txtTipoEvaluacion').val();
+      const fecha = $('#txtFecha').val();
       const tabla = $('#tbl').DataTable();
 
-      const payload = {
-        nombre: nombre,
-        apellido: apellido,
-        nacionalidad: nacionalidad
-      };
-
-      if(idNacionalidad) {
+      if(idEvaluacion) {
         // update
-        fetch(`/api/v1/nacionalidades/${idNacionalidad}`, {
+        fetch(`/api/v1/evaluaciones/${idEvaluacion}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify(payload)
+          }, body: JSON.stringify({ nombre, tipo_evaluacion: tipoEvaluacion, fecha })
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "La nacionalidad ha sido actualizada correctamente.", "success");
+            Swal.fire("Actualizado", "La evaluación ha sido actualizada correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al actualizar la nacionalidad.", "error");
+          Swal.fire("Error", "Ocurrió un error al actualizar la evaluación.", "error");
         });
       } else {
         // insert
-        fetch(`/api/v1/nacionalidades`, {
+        fetch(`/api/v1/evaluaciones`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify(payload)
+          }, body: JSON.stringify({ nombre, tipo_evaluacion: tipoEvaluacion, fecha })
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Registrado", "La nacionalidad ha sido agregada correctamente.", "success");
+            Swal.fire("Agregado", "La evaluación ha sido agregada correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al guardar la nacionalidad.", "error");
+          Swal.fire("Error", "Ocurrió un error al guardar la evaluación.", "error");
         });
       }
+      $('#txtNombre').val("");
+      $('#txtTipoEvaluacion').val("");
+      $('#txtFecha').val("");
       $('#modalFormulario').modal("hide");
     });
   }
 
   const editar = () => {
-    $('#tbl').on('click', 'button[name="btn_editar"]',function(){
+    $('#tbl').on('click', 'button[name="btn_editar"]', function() {
+      // Mostrar mensaje de confirmación usando sweetalert
       Swal.fire({
         title: "¿Deseas editar este registro?",
         showCancelButton: true,
@@ -182,13 +180,13 @@ Nacionalidades
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          $('#modalTitle').text("Editar una Nacionalidad");
+          $('#modalTitle').text("Editar una Evaluación");
 
-          const idNacionalidad = $(this).data('id');
-          $('#txtIdNacionalidad').val(idNacionalidad);
+          const idEvaluacion = $(this).data('id');
+          $('#txtIdEvaluacion').val(idEvaluacion);
 
-          // Obtener datos del backend
-          fetch(`/api/v1/nacionalidades/${idNacionalidad}`, {
+          // Necesitamos obtener los detalles de la evaluación del backend
+          fetch(`/api/v1/evaluaciones/${idEvaluacion}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json'
@@ -197,8 +195,8 @@ Nacionalidades
           .then(resp => resp.json())
           .then(data => {
             $('#txtNombre').val(data.data.nombre);
-            $('#txtApellido').val(data.data.apellido);
-            $('#txtNacionalidad').val(data.data.nacionalidad);
+            $('#txtTipoEvaluacion').val(data.data.tipo_evaluacion);
+            $('#txtFecha').val(data.data.fecha);
             $('#modalFormulario').modal();
           });
         }
@@ -207,8 +205,9 @@ Nacionalidades
   }
 
   const eliminar = () => {
-    $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
-      const idNacionalidad = $(this).data('id');
+    $('#tbl').on('click', 'button[name="btn_eliminar"]', function() {
+      const idEvaluacion = $(this).data('id');
+      // Mostrar mensaje de confirmación usando sweetalert
       Swal.fire({
         title: "¿Deseas eliminar este registro?",
         showCancelButton: true,
@@ -216,7 +215,7 @@ Nacionalidades
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          fetch(`/api/v1/nacionalidades/${idNacionalidad}`, {
+          fetch(`/api/v1/evaluaciones/${idEvaluacion}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json'
@@ -225,7 +224,8 @@ Nacionalidades
           .then(resp => resp.json())
           .then(data => {
             if(data && !data.error && data.success) {
-              const fila =$(this).closest('tr');
+              // Para borrar la fila del datatable(cliente)
+              const fila = $(this).closest('tr');
               const tabla = $('#tbl').DataTable();
               tabla.row(fila).remove().draw();
               Swal.fire("Eliminado", "", "success");
@@ -233,11 +233,10 @@ Nacionalidades
               Swal.fire(data.error);
             }
           }).catch(err => {
-            Swal.fire("Error", "Ocurrió un error al eliminar la nacionalidad.", "error");
+            Swal.fire("Error", "Ocurrió un error al eliminar la evaluación.", "error");
           });
         }
       });
-
     });
   }
 

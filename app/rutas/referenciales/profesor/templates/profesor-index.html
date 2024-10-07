@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
 {% block titulo %}
-Paises
+Profesores
 {% endblock %}
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Paises</h3>
+    <h3>Listar Profesores</h3>
 
-    <!-- Tarjeta -->
+    <!-- tarjeta -->
     <div class="card">
         <div class="card-header">
             <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
@@ -19,7 +19,9 @@ Paises
                     <tr>
                         <th>Nombre</th>
                         <th>Apellido</th>
-                        <th>País</th>
+                        <th>Título Académico</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -27,23 +29,22 @@ Paises
             </table>
         </div>
     </div>
-    <!-- /Tarjeta -->
+    <!-- /tarjeta -->
 
-    <!-- Modal Formulario -->
+    <!-- El formulario -->
     <div class="modal" id="modalFormulario">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
                 <!-- Modal Header -->
                 <div class="modal-header">
                     <h4 class="modal-title" id="modalTitle"></h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
 
-                <!-- Modal Body -->
+                <!-- Modal body -->
                 <div class="modal-body">
                     <div class="form-group">
-                        <input type="hidden" id="txtIdPais">
+                        <input type="hidden" id="txtIdProfesor">
                         <label for="txtNombre">Nombre:</label>
                         <input type="text" class="form-control" placeholder="Ingrese el nombre" id="txtNombre">
                     </div>
@@ -52,12 +53,20 @@ Paises
                         <input type="text" class="form-control" placeholder="Ingrese el apellido" id="txtApellido">
                     </div>
                     <div class="form-group">
-                        <label for="txtPais">País:</label>
-                        <input type="text" class="form-control" placeholder="Ingrese el país" id="txtPais">
+                        <label for="txtTitulo">Título Académico:</label>
+                        <input type="text" class="form-control" placeholder="Ingrese el título académico" id="txtTitulo">
+                    </div>
+                    <div class="form-group">
+                        <label for="txtCorreo">Correo:</label>
+                        <input type="email" class="form-control" placeholder="Ingrese el correo" id="txtCorreo">
+                    </div>
+                    <div class="form-group">
+                        <label for="txtTelefono">Teléfono:</label>
+                        <input type="text" class="form-control" placeholder="Ingrese el teléfono" id="txtTelefono">
                     </div>
                 </div>
 
-                <!-- Modal Footer -->
+                <!-- Modal footer -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
@@ -66,7 +75,6 @@ Paises
         </div>
     </div>
 
-    <!-- Alerta de éxito -->
     <div class="row mt-4 d-none" id="rowAlerta">
         <div class="col col-md-12">
             <div class="alert alert-success">
@@ -85,108 +93,118 @@ Paises
             language: {
                 url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
             },
-            ajax: '/api/v1/paises',
+            ajax: '/api/v1/profesores',
             columns: [
-                { data: 'nombre' },
-                { data: 'apellido' },
-                { data: 'pais' },
+                { data: 'nombre_profesor' },
+                { data: 'apellido_profesor' },
+                { data: 'titulo_academico' },
+                { data: 'correo' },
+                { data: 'telefono' },
                 { data: function(row) {
-                        return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
-                                <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
-                    }
-                }
+                    return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id_profesor}">Editar</button>
+                            <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_profesor}">Eliminar</button>`;
+                }}
             ]
         });
     }
 
     const agregar = () => {
         $('#btnAgregar').on('click', function(){
-            $('#modalTitle').text("Agregar un País");
-            $('#txtIdPais').val("");
+            $('#modalTitle').text("Agregar un Profesor");
+            $('#txtIdProfesor').val("");
             $('#txtNombre').val("");
             $('#txtApellido').val("");
-            $('#txtPais').val("");
+            $('#txtTitulo').val("");
+            $('#txtCorreo').val("");
+            $('#txtTelefono').val("");
             $('#modalFormulario').modal();
         });
     }
 
     const guardar = () => {
         $('#btnGuardar').on('click', function() {
-            const idPais = $('#txtIdPais').val();
-            const nuevoNombre = $('#txtNombre').val();
-            const nuevoApellido = $('#txtApellido').val();
-            const nuevoPais = $('#txtPais').val();
+            const idProfesor = $('#txtIdProfesor').val();
+            const nombre = $('#txtNombre').val();
+            const apellido = $('#txtApellido').val();
+            const titulo = $('#txtTitulo').val();
+            const correo = $('#txtCorreo').val();
+            const telefono = $('#txtTelefono').val();
             const tabla = $('#tbl').DataTable();
 
-            const data = { 
-                nombre: nuevoNombre, 
-                apellido: nuevoApellido, 
-                pais: nuevoPais 
-            };
-
-            if(idPais) {
-                // Update
-                fetch(`/api/v1/paises/${idPais}`, {
+            if (idProfesor) {
+                // update
+                fetch(`/api/v1/profesores/${idProfesor}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     }, 
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ 
+                        nombre_profesor: nombre, 
+                        apellido_profesor: apellido, 
+                        titulo_academico: titulo, 
+                        correo: correo, 
+                        telefono: telefono 
+                    })
                 })
                 .then(resp => resp.json())
                 .then(data => {
                     if(data && !data.error && data.success) {
                         tabla.ajax.reload();
-                        Swal.fire("Actualizado", "El país ha sido actualizado correctamente.", "success");
+                        Swal.fire("Actualizado", "El profesor ha sido actualizado correctamente.", "success");
                     } else {
                         Swal.fire(data.error);
                     }
                 }).catch(err => {
-                    Swal.fire("Error", "Ocurrió un error al actualizar el país.", "error");
+                    console.error(err);
+                    Swal.fire("Error", "Ocurrió un error al actualizar el profesor.", "error");
                 });
             } else {
-                // Insert
-                fetch(`/api/v1/paises`, {
+                // insert
+                fetch(`/api/v1/profesores`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     }, 
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ 
+                        nombre_profesor: nombre, 
+                        apellido_profesor: apellido, 
+                        titulo_academico: titulo, 
+                        correo: correo, 
+                        telefono: telefono 
+                    })
                 })
                 .then(resp => resp.json())
                 .then(data => {
                     if(data && !data.error && data.success) {
                         tabla.ajax.reload();
-                        Swal.fire("Agregado", "El país ha sido agregado correctamente.", "success");
+                        Swal.fire("Agregado", "El profesor ha sido agregado correctamente.", "success");
                     } else {
                         Swal.fire(data.error);
                     }
                 }).catch(err => {
-                    Swal.fire("Error", "Ocurrió un error al guardar el país.", "error");
+                    console.error(err);
+                    Swal.fire("Error", "Ocurrió un error al guardar el profesor.", "error");
                 });
             }
-            $('#txtNombre').val("");
-            $('#txtApellido').val("");
-            $('#txtPais').val("");
             $('#modalFormulario').modal("hide");
         });
     }
 
     const editar = () => {
-        $('#tbl').on('click', 'button[name="btn_editar"]',function(){
+        $('#tbl').on('click', 'button[name="btn_editar"]', function(){
             Swal.fire({
                 title: "¿Deseas editar este registro?",
                 showCancelButton: true,
-                confirmButtonText: "Si",
-                cancelButtonText: `No`
+                confirmButtonText: "Sí",
+                cancelButtonText: "No"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $('#modalTitle').text("Editar un País");
+                    $('#modalTitle').text("Editar un Profesor");
 
-                    const idPais = $(this).data('id');
-                    $('#txtIdPais').val(idPais);
+                    const idProfesor = $(this).data('id');
+                    $('#txtIdProfesor').val(idProfesor);
 
-                    fetch(`/api/v1/paises/${idPais}`, {
+                    fetch(`/api/v1/profesores/${idProfesor}`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json'
@@ -194,9 +212,11 @@ Paises
                     })
                     .then(resp => resp.json())
                     .then(data => {
-                        $('#txtNombre').val(data.data.nombre);
-                        $('#txtApellido').val(data.data.apellido);
-                        $('#txtPais').val(data.data.pais);
+                        $('#txtNombre').val(data.data.nombre_profesor);
+                        $('#txtApellido').val(data.data.apellido_profesor);
+                        $('#txtTitulo').val(data.data.titulo_academico);
+                        $('#txtCorreo').val(data.data.correo);
+                        $('#txtTelefono').val(data.data.telefono);
                         $('#modalFormulario').modal();
                     });
                 }
@@ -205,16 +225,16 @@ Paises
     }
 
     const eliminar = () => {
-        $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
-            const idPais = $(this).data('id');
+        $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
+            const idProfesor = $(this).data('id');
             Swal.fire({
                 title: "¿Deseas eliminar este registro?",
                 showCancelButton: true,
-                confirmButtonText: "Si",
-                cancelButtonText: `No`
+                confirmButtonText: "Sí",
+                cancelButtonText: "No"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/api/v1/paises/${idPais}`, {
+                    fetch(`/api/v1/profesores/${idProfesor}`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json'
@@ -231,7 +251,7 @@ Paises
                             Swal.fire(data.error);
                         }
                     }).catch(err => {
-                        Swal.fire("Error", "Ocurrió un error al eliminar el país.", "error");
+                        Swal.fire("Error", "Ocurrió un error al eliminar el profesor.", "error");
                     });
                 }
             });

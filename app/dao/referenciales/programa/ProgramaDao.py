@@ -1,30 +1,30 @@
-# Data access object - DAO
+# Data access object - DAO para programas
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 
-class PaisDao:
+class ProgramaDao:
 
-    def getPaises(self):
-        paisSQL = """
-        SELECT id, nombre, apellido, pais
-        FROM paises
+    def getProgramas(self):
+        programaSQL = """
+        SELECT id, nombre, facultad, duracion
+        FROM programas
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(paisSQL)
+            cur.execute(programaSQL)
             # trae datos de la bd
-            lista_paises = cur.fetchall()
+            lista_programas = cur.fetchall()
             # retorno los datos
             lista_ordenada = []
-            for item in lista_paises:
+            for item in lista_programas:
                 lista_ordenada.append({
                     "id": item[0],
                     "nombre": item[1],
-                    "apellido": item[2],
-                    "pais": item[3]
+                    "facultad": item[2],
+                    "duracion": item[3]
                 })
             return lista_ordenada
         except con.Error as e:
@@ -33,35 +33,37 @@ class PaisDao:
             cur.close()
             con.close()
 
-    def getPaisById(self, id):
-        paisSQL = """
-        SELECT id, nombre, apellido, pais
-        FROM paises WHERE id=%s
+    def getProgramaById(self, id):
+        programaSQL = """
+        SELECT id, nombre, facultad, duracion
+        FROM programas WHERE id=%s
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(paisSQL, (id,))
+            cur.execute(programaSQL, (id,))
             # trae datos de la bd
-            paisEncontrada = cur.fetchone()
+            programaEncontrado = cur.fetchone()
             # retorno los datos
-            return {
-                "id": paisEncontrada[0],
-                "nombre": paisEncontrada[1],
-                "apellido": paisEncontrada[2],
-                "pais": paisEncontrada[3]
-            }
+            if programaEncontrado:
+                return {
+                    "id": programaEncontrado[0],
+                    "nombre": programaEncontrado[1],
+                    "facultad": programaEncontrado[2],
+                    "duracion": programaEncontrado[3]
+                }
+            return None  # Si no se encuentra el programa
         except con.Error as e:
             app.logger.info(e)
         finally:
             cur.close()
             con.close()
 
-    def guardarPais(self, nombre, apellido, pais):
-        insertPaisSQL = """
-        INSERT INTO paises(nombre, apellido, pais) VALUES(%s, %s, %s)
+    def guardarPrograma(self, nombre, facultad, duracion):
+        insertProgramaSQL = """
+        INSERT INTO programas(nombre, facultad, duracion) VALUES(%s, %s, %s)
         """
         conexion = Conexion()
         con = conexion.getConexion()
@@ -69,8 +71,8 @@ class PaisDao:
 
         # Ejecucion exitosa
         try:
-            cur.execute(insertPaisSQL, (nombre, apellido, pais))
-            # se confirma la insercion
+            cur.execute(insertProgramaSQL, (nombre, facultad, duracion))
+            # se confirma la inserción
             con.commit()
             return True
         except con.Error as e:
@@ -81,10 +83,10 @@ class PaisDao:
 
         return False
 
-    def updatePais(self, id, nombre, apellido, pais):
-        updatePaisSQL = """
-        UPDATE paises
-        SET nombre=%s, apellido=%s, pais=%s
+    def updatePrograma(self, id, nombre, facultad, duracion):
+        updateProgramaSQL = """
+        UPDATE programas
+        SET nombre=%s, facultad=%s, duracion=%s
         WHERE id=%s
         """
         conexion = Conexion()
@@ -93,8 +95,8 @@ class PaisDao:
 
         # Ejecucion exitosa
         try:
-            cur.execute(updatePaisSQL, (nombre, apellido, pais, id))
-            # se confirma la actualizacion
+            cur.execute(updateProgramaSQL, (nombre, facultad, duracion, id))
+            # se confirma la actualización
             con.commit()
             return True
         except con.Error as e:
@@ -105,9 +107,9 @@ class PaisDao:
 
         return False
 
-    def deletePais(self, id):
-        deletePaisSQL = """
-        DELETE FROM paises
+    def deletePrograma(self, id):
+        deleteProgramaSQL = """
+        DELETE FROM programas
         WHERE id=%s
         """
         conexion = Conexion()
@@ -116,7 +118,7 @@ class PaisDao:
 
         # Ejecucion exitosa
         try:
-            cur.execute(deletePaisSQL, (id,))
+            cur.execute(deleteProgramaSQL, (id,))
             # se confirma la eliminación
             con.commit()
             return True

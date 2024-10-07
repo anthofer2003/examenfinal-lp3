@@ -8,7 +8,7 @@ Estudiantes
 <div class="container mt-4">
     <h3>Listar Estudiantes</h3>
 
-    <!-- tarjeta -->
+    <!-- Tarjeta -->
     <div class="card">
         <div class="card-header">
             <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
@@ -29,9 +29,9 @@ Estudiantes
             </table>
         </div>
     </div>
-    <!-- /tarjeta -->
+    <!-- /Tarjeta -->
 
-    <!-- El formulario -->
+    <!-- Modal Formulario -->
     <div class="modal" id="modalFormulario">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -42,7 +42,7 @@ Estudiantes
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
 
-                <!-- Modal body -->
+                <!-- Modal Body -->
                 <div class="modal-body">
                     <div class="form-group">
                         <input type="hidden" id="txtIdEstudiante">
@@ -67,16 +67,16 @@ Estudiantes
                     </div>
                 </div>
 
-                <!-- Modal footer -->
+                <!-- Modal Footer -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
                 </div>
-
             </div>
         </div>
     </div>
 
+    <!-- Alerta de éxito -->
     <div class="row mt-4 d-none" id="rowAlerta">
         <div class="col col-md-12">
             <div class="alert alert-success">
@@ -95,16 +95,16 @@ Estudiantes
             language: {
                 url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
             },
-            ajax: '/api/v1/estudiantes',  // Cambiado a la ruta de estudiantes
+            ajax: '/api/v1/estudiantes',  // Cambia la URL a la de estudiantes
             columns: [
                 { data: 'nombre' },
                 { data: 'apellido' },
                 { data: 'fecha_nacimiento' },
                 { data: 'telefono' },
                 { data: 'direccion' },
-                { data: function (row) {
-                    return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
-                            <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
+                { data: function(row) {
+                        return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
+                                <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
                     }
                 }
             ]
@@ -112,7 +112,7 @@ Estudiantes
     }
 
     const agregar = () => {
-        $('#btnAgregar').on('click', function () {
+        $('#btnAgregar').on('click', function(){
             $('#modalTitle').text("Agregar un Estudiante");
             $('#txtIdEstudiante').val("");
             $('#txtNombre').val("");
@@ -125,67 +125,61 @@ Estudiantes
     }
 
     const guardar = () => {
-        $('#btnGuardar').on('click', function () {
+        $('#btnGuardar').on('click', function() {
             const idEstudiante = $('#txtIdEstudiante').val();
-            const nombre = $('#txtNombre').val();
-            const apellido = $('#txtApellido').val();
-            const fechaNacimiento = $('#txtFechaNacimiento').val();
-            const telefono = $('#txtTelefono').val();
-            const direccion = $('#txtDireccion').val();
+            const nuevoNombre = $('#txtNombre').val();
+            const nuevoApellido = $('#txtApellido').val();
+            const nuevaFechaNacimiento = $('#txtFechaNacimiento').val();
+            const nuevoTelefono = $('#txtTelefono').val();
+            const nuevaDireccion = $('#txtDireccion').val();
             const tabla = $('#tbl').DataTable();
 
-            if (idEstudiante) {
-                // update
+            const data = { 
+                nombre: nuevoNombre, 
+                apellido: nuevoApellido, 
+                fecha_nacimiento: nuevaFechaNacimiento,
+                telefono: nuevoTelefono,
+                direccion: nuevaDireccion
+            };
+
+            if(idEstudiante) {
+                // Update
                 fetch(`/api/v1/estudiantes/${idEstudiante}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        nombre: nombre,
-                        apellido: apellido,
-                        fecha_nacimiento: fechaNacimiento,
-                        telefono: telefono,
-                        direccion: direccion
-                    })
+                    }, 
+                    body: JSON.stringify(data)
                 })
                 .then(resp => resp.json())
                 .then(data => {
-                    if (data && !data.error && data.success) {
+                    if(data && !data.error && data.success) {
                         tabla.ajax.reload();
                         Swal.fire("Actualizado", "El estudiante ha sido actualizado correctamente.", "success");
                     } else {
                         Swal.fire(data.error);
                     }
                 }).catch(err => {
-                    console.error(err);
                     Swal.fire("Error", "Ocurrió un error al actualizar el estudiante.", "error");
                 });
             } else {
-                // insert
+                // Insert
                 fetch(`/api/v1/estudiantes`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        nombre: nombre,
-                        apellido: apellido,
-                        fecha_nacimiento: fechaNacimiento,
-                        telefono: telefono,
-                        direccion: direccion
-                    })
+                    }, 
+                    body: JSON.stringify(data)
                 })
                 .then(resp => resp.json())
                 .then(data => {
-                    if (data && !data.error && data.success) {
+                    if(data && !data.error && data.success) {
                         tabla.ajax.reload();
                         Swal.fire("Agregado", "El estudiante ha sido agregado correctamente.", "success");
                     } else {
                         Swal.fire(data.error);
                     }
                 }).catch(err => {
-                    console.error(err);
                     Swal.fire("Error", "Ocurrió un error al guardar el estudiante.", "error");
                 });
             }
@@ -194,7 +188,7 @@ Estudiantes
     }
 
     const editar = () => {
-        $('#tbl').on('click', 'button[name="btn_editar"]', function () {
+        $('#tbl').on('click', 'button[name="btn_editar"]',function(){
             Swal.fire({
                 title: "¿Deseas editar este registro?",
                 showCancelButton: true,
@@ -228,7 +222,7 @@ Estudiantes
     }
 
     const eliminar = () => {
-        $('#tbl').on('click', 'button[name="btn_eliminar"]', function () {
+        $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
             const idEstudiante = $(this).data('id');
             Swal.fire({
                 title: "¿Deseas eliminar este registro?",
@@ -245,11 +239,11 @@ Estudiantes
                     })
                     .then(resp => resp.json())
                     .then(data => {
-                        if (data && !data.error && data.success) {
+                        if(data && !data.error && data.success) {
                             const fila = $(this).closest('tr');
                             const tabla = $('#tbl').DataTable();
                             tabla.row(fila).remove().draw();
-                            Swal.fire("Eliminado", "", data.success);
+                            Swal.fire("Eliminado", "", "success");
                         } else {
                             Swal.fire(data.error);
                         }
@@ -268,7 +262,7 @@ Estudiantes
         eliminar();
     }
 
-    $(function () {
+    $(function() {
         initDatatable();
         addEvents();
     });

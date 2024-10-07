@@ -2,29 +2,30 @@
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 
-class PaisDao:
+class NotaDao:
 
-    def getPaises(self):
-        paisSQL = """
-        SELECT id, nombre, apellido, pais
-        FROM paises
+    def getNotas(self):
+        notasSQL = """
+        SELECT id, nombre_estudiante, curso, nota, fecha_evaluacion
+        FROM notas
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(paisSQL)
+            cur.execute(notasSQL)
             # trae datos de la bd
-            lista_paises = cur.fetchall()
+            lista_notas = cur.fetchall()
             # retorno los datos
             lista_ordenada = []
-            for item in lista_paises:
+            for item in lista_notas:
                 lista_ordenada.append({
                     "id": item[0],
-                    "nombre": item[1],
-                    "apellido": item[2],
-                    "pais": item[3]
+                    "nombre_estudiante": item[1],
+                    "curso": item[2],
+                    "nota": item[3],
+                    "fecha_evaluacion": item[4].isoformat()  # Convertir a formato ISO
                 })
             return lista_ordenada
         except con.Error as e:
@@ -33,43 +34,45 @@ class PaisDao:
             cur.close()
             con.close()
 
-    def getPaisById(self, id):
-        paisSQL = """
-        SELECT id, nombre, apellido, pais
-        FROM paises WHERE id=%s
+    def getNotaById(self, id):
+        notaSQL = """
+        SELECT id, nombre_estudiante, curso, nota, fecha_evaluacion
+        FROM notas WHERE id=%s
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(paisSQL, (id,))
+            cur.execute(notaSQL, (id,))
             # trae datos de la bd
-            paisEncontrada = cur.fetchone()
+            notaEncontrada = cur.fetchone()
             # retorno los datos
             return {
-                "id": paisEncontrada[0],
-                "nombre": paisEncontrada[1],
-                "apellido": paisEncontrada[2],
-                "pais": paisEncontrada[3]
-            }
+                    "id": notaEncontrada[0],
+                    "nombre_estudiante": notaEncontrada[1],
+                    "curso": notaEncontrada[2],
+                    "nota": notaEncontrada[3],
+                    "fecha_evaluacion": notaEncontrada[4].isoformat()  # Convertir a formato ISO
+                }
         except con.Error as e:
             app.logger.info(e)
         finally:
             cur.close()
             con.close()
 
-    def guardarPais(self, nombre, apellido, pais):
-        insertPaisSQL = """
-        INSERT INTO paises(nombre, apellido, pais) VALUES(%s, %s, %s)
+    def guardarNota(self, nombre_estudiante, curso, nota, fecha_evaluacion):
+        insertNotaSQL = """
+        INSERT INTO notas(nombre_estudiante, curso, nota, fecha_evaluacion) VALUES(%s, %s, %s, %s)
         """
+
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
 
         # Ejecucion exitosa
         try:
-            cur.execute(insertPaisSQL, (nombre, apellido, pais))
+            cur.execute(insertNotaSQL, (nombre_estudiante, curso, nota, fecha_evaluacion))
             # se confirma la insercion
             con.commit()
             return True
@@ -81,20 +84,21 @@ class PaisDao:
 
         return False
 
-    def updatePais(self, id, nombre, apellido, pais):
-        updatePaisSQL = """
-        UPDATE paises
-        SET nombre=%s, apellido=%s, pais=%s
+    def updateNota(self, id, nombre_estudiante, curso, nota, fecha_evaluacion):
+        updateNotaSQL = """
+        UPDATE notas
+        SET nombre_estudiante=%s, curso=%s, nota=%s, fecha_evaluacion=%s
         WHERE id=%s
         """
+
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
 
         # Ejecucion exitosa
         try:
-            cur.execute(updatePaisSQL, (nombre, apellido, pais, id))
-            # se confirma la actualizacion
+            cur.execute(updateNotaSQL, (nombre_estudiante, curso, nota, fecha_evaluacion, id))
+            # se confirma la insercion
             con.commit()
             return True
         except con.Error as e:
@@ -105,19 +109,20 @@ class PaisDao:
 
         return False
 
-    def deletePais(self, id):
-        deletePaisSQL = """
-        DELETE FROM paises
+    def deleteNota(self, id):
+        deleteNotaSQL = """
+        DELETE FROM notas
         WHERE id=%s
         """
+
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
 
         # Ejecucion exitosa
         try:
-            cur.execute(deletePaisSQL, (id,))
-            # se confirma la eliminación
+            cur.execute(deleteNotaSQL, (id,))
+            # se confirma la insercion
             con.commit()
             return True
         except con.Error as e:

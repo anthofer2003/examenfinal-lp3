@@ -2,29 +2,29 @@
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 
-class PaisDao:
+class EvaluacionDao:
 
-    def getPaises(self):
-        paisSQL = """
-        SELECT id, nombre, apellido, pais
-        FROM paises
+    def getEvaluaciones(self):
+        evaluacionSQL = """
+        SELECT id, nombre, tipo_evaluacion, fecha
+        FROM evaluaciones
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(paisSQL)
+            cur.execute(evaluacionSQL)
             # trae datos de la bd
-            lista_paises = cur.fetchall()
+            lista_evaluaciones = cur.fetchall()
             # retorno los datos
             lista_ordenada = []
-            for item in lista_paises:
+            for item in lista_evaluaciones:
                 lista_ordenada.append({
                     "id": item[0],
                     "nombre": item[1],
-                    "apellido": item[2],
-                    "pais": item[3]
+                    "tipo_evaluacion": item[2],
+                    "fecha": item[3]
                 })
             return lista_ordenada
         except con.Error as e:
@@ -33,25 +33,25 @@ class PaisDao:
             cur.close()
             con.close()
 
-    def getPaisById(self, id):
-        paisSQL = """
-        SELECT id, nombre, apellido, pais
-        FROM paises WHERE id=%s
+    def getEvaluacionById(self, id):
+        evaluacionSQL = """
+        SELECT id, nombre, tipo_evaluacion, fecha
+        FROM evaluaciones WHERE id=%s
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(paisSQL, (id,))
+            cur.execute(evaluacionSQL, (id,))
             # trae datos de la bd
-            paisEncontrada = cur.fetchone()
+            evaluacionEncontrada = cur.fetchone()
             # retorno los datos
             return {
-                "id": paisEncontrada[0],
-                "nombre": paisEncontrada[1],
-                "apellido": paisEncontrada[2],
-                "pais": paisEncontrada[3]
+                "id": evaluacionEncontrada[0],
+                "nombre": evaluacionEncontrada[1],
+                "tipo_evaluacion": evaluacionEncontrada[2],
+                "fecha": evaluacionEncontrada[3]
             }
         except con.Error as e:
             app.logger.info(e)
@@ -59,69 +59,84 @@ class PaisDao:
             cur.close()
             con.close()
 
-    def guardarPais(self, nombre, apellido, pais):
-        insertPaisSQL = """
-        INSERT INTO paises(nombre, apellido, pais) VALUES(%s, %s, %s)
+    def guardarEvaluacion(self, nombre, tipo_evaluacion, fecha):
+        insertEvaluacionSQL = """
+        INSERT INTO evaluaciones(nombre, tipo_evaluacion, fecha) VALUES(%s, %s, %s)
         """
+
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
 
         # Ejecucion exitosa
         try:
-            cur.execute(insertPaisSQL, (nombre, apellido, pais))
+            cur.execute(insertEvaluacionSQL, (nombre, tipo_evaluacion, fecha))
             # se confirma la insercion
             con.commit()
             return True
+
+        # Si algo fallo entra aquí
         except con.Error as e:
             app.logger.info(e)
+
+        # Siempre se va a ejecutar
         finally:
             cur.close()
             con.close()
 
         return False
 
-    def updatePais(self, id, nombre, apellido, pais):
-        updatePaisSQL = """
-        UPDATE paises
-        SET nombre=%s, apellido=%s, pais=%s
+    def updateEvaluacion(self, id, nombre, tipo_evaluacion, fecha):
+        updateEvaluacionSQL = """
+        UPDATE evaluaciones
+        SET nombre=%s, tipo_evaluacion=%s, fecha=%s
         WHERE id=%s
         """
+
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
 
         # Ejecucion exitosa
         try:
-            cur.execute(updatePaisSQL, (nombre, apellido, pais, id))
-            # se confirma la actualizacion
+            cur.execute(updateEvaluacionSQL, (nombre, tipo_evaluacion, fecha, id))
+            # se confirma la insercion
             con.commit()
             return True
+
+        # Si algo fallo entra aquí
         except con.Error as e:
             app.logger.info(e)
+
+        # Siempre se va a ejecutar
         finally:
             cur.close()
             con.close()
 
         return False
 
-    def deletePais(self, id):
-        deletePaisSQL = """
-        DELETE FROM paises
+    def deleteEvaluacion(self, id):
+        deleteEvaluacionSQL = """
+        DELETE FROM evaluaciones
         WHERE id=%s
         """
+
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
 
         # Ejecucion exitosa
         try:
-            cur.execute(deletePaisSQL, (id,))
-            # se confirma la eliminación
+            cur.execute(deleteEvaluacionSQL, (id,))
+            # se confirma la insercion
             con.commit()
             return True
+
+        # Si algo fallo entra aquí
         except con.Error as e:
             app.logger.info(e)
+
+        # Siempre se va a ejecutar
         finally:
             cur.close()
             con.close()
