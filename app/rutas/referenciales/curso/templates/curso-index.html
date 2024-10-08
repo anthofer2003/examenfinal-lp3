@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+    
+{% block titulo %}
+Cursos Particulares
+{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h3>Listar Cursos Particulares</h3>
+
+    <!-- tarjeta -->
+    <div class="card">
+      <div class="card-header">
+        <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
+      </div>
+      <div class="card-body">
+        <table class="table table-striped" id="tbl">
+          <thead>
+            <tr>
+              <th>Curso</th>
+              <th>Fecha Inicio</th>
+              <th>Fecha Fin</th>
+              <th>Precio por Mes</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- /tarjeta -->
+
+    <!-- Modal para el formulario -->
+    <div class="modal" id="modalFormulario">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title" id="modalTitle"></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">
+            <div class="form-group">
+              <input type="hidden" id="txtIdCurso">
+              <label for="txtCurso">Curso:</label>
+              <input type="text" class="form-control" id="txtCurso">
+
+              <label for="txtFechaInicio">Fecha Inicio:</label>
+              <input type="date" class="form-control" id="txtFechaInicio">
+
+              <label for="txtFechaFin">Fecha Fin:</label>
+              <input type="date" class="form-control" id="txtFechaFin">
+
+              <label for="txtPrecioMes">Precio por Mes:</label>
+              <input type="text" class="form-control" id="txtPrecioMes">
+            </div>
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4 d-none" id="rowAlerta">
+        <div class="col col-md-12">
+            <div class="alert alert-success">
+                <strong>Registro Exitoso!</strong>
+                <div class="row" id="mostrarAlerta"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+
+  const initDatatable = () => {
+    $('#tbl').DataTable({
+      language: {
+        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+      },
+      ajax:'/api/v1/cursos',
+      columns: [
+        { data: 'curso' },
+        { data: 'fecha_inicio' },
+        { data: 'fecha_fin' },
+        { data: 'precio_mes' },
+        { data: function(row) {
+            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
+                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
+          }
+        }
+      ]
+    });
+  }
+
+  const agregar = () => {
+    $('#btnAgregar').on('click', function(){
+      $('#modalTitle').text("Agregar un Curso");
+      $('#txtIdCurso').val("");
+      $('#txtCurso').val("");
+      $('#txtFechaInicio').val("");
+      $('#txtFechaFin').val("");
+      $('#txtPrecioMes').val("");
+      $('#modalFormulario').modal();
+    });
+  }
+
+  const guardar = () => {
+    $('#btnGuardar').on('click', function() {
+      const idCurso = $('#txtIdCurso').val();
+      const curso = $('#txtCurso').val();
+      const fechaInicio = $('#txtFechaInicio').val();
+      const fechaFin = $('#txtFechaFin').val();
+      const precioMes = $('#txtPrecioMes').val();
+      const tabla = $('#tbl').DataTable();
+
+      if(idCurso) {
+        // update
+        fetch(`/api/v1/cursos/${idCurso}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }, 
+          body: JSON.stringify({
+            curso: curso,
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin,
+            precio_mes: precioMes
+          })
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if(data && !data.error && data.success) {
+            tabla.ajax.reload();
+            Swal.fire("Actualizado", "El curso ha sido actualizado correctamente.", "success");
+          } else {
+            Swal.fire(data.error);
+          }
+        }).catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Ocurrió un error al actualizar el curso.", "error");
+        });
+      } else {
+        // insert
+        fetch(`/api/v1/cursos`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }, 
+          body: JSON.stringify({
+            curso: curso,
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin,
+            precio_mes: precioMes
+          })
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if(data && !data.error && data.success) {
+            tabla.ajax.reload();
+            Swal.fire("Registrado", "El curso ha sido registrado correctamente.", "success");
+          } else {
+            Swal.fire(data.error);
+          }
+        }).catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Ocurrió un error al guardar el curso.", "error");
+        });
+      }
+      $('#modalFormulario').modal("hide");
+    });
+  }
+
+  const editar = () => {
+    $('#tbl').on('click', 'button[name="btn_editar"]', function(){
+      Swal.fire({
+        title: "¿Deseas editar este registro?",
+        showCancelButton: true,
+        confirmButtonText: "Si",
+        cancelButtonText: `No`
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $('#modalTitle').text("Editar un Curso");
+
+          const idCurso = $(this).data('id');
+          $('#txtIdCurso').val(idCurso);
+
+          fetch(`/api/v1/cursos/${idCurso}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(resp => resp.json())
+          .then(data => {
+            $('#txtCurso').val(data.data.curso);
+            $('#txtFechaInicio').val(data.data.fecha_inicio);
+            $('#txtFechaFin').val(data.data.fecha_fin);
+            $('#txtPrecioMes').val(data.data.precio_mes);
+            $('#modalFormulario').modal();
+          });
+        }
+      });
+    });
+  }
+
+  const eliminar = () => {
+    $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
+      const idCurso = $(this).data('id');
+      Swal.fire({
+        title: "¿Deseas eliminar este registro?",
+        showCancelButton: true,
+        confirmButtonText: "Si",
+        cancelButtonText: `No`
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/api/v1/cursos/${idCurso}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(resp => resp.json())
+          .then(data => {
+            if(data && !data.error && data.success) {
+              const fila = $(this).closest('tr');
+              const tabla = $('#tbl').DataTable();
+              tabla.row(fila).remove().draw();
+              Swal.fire("Eliminado", "", data.success);
+            } else {
+              Swal.fire(data.error);
+            }
+          }).catch(err => {
+            Swal.fire("Error", "Ocurrió un error al eliminar el curso.", "error");
+          });
+        }
+      });
+    });
+  }
+
+  const addEvents = () => {
+    agregar();
+    guardar();
+    editar();
+    eliminar();
+  }
+
+  $(function() {
+    initDatatable();
+    addEvents();
+  });
+</script>
+{% endblock %}

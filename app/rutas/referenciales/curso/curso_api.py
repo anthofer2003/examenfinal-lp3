@@ -1,63 +1,63 @@
 from flask import Blueprint, request, jsonify, current_app as app
-from app.dao.referenciales.horario.HorarioDao import HorarioDao
+from app.dao.referenciales.curso.CursoDao import CursoParticularDao
 
-horarios_api = Blueprint('horarios_api', __name__)
+cursos_api = Blueprint('cursos_api', __name__)
 
-# Obtener todos los horarios
-@horarios_api.route('/horarios', methods=['GET'])
-def getHorarios():
-    horario_dao = HorarioDao()
+# Obtener todos los cursos
+@cursos_api.route('/cursos', methods=['GET'])
+def getCursos():
+    curso_dao = CursoParticularDao()
 
     try:
-        horarios = horario_dao.getHorarios()
+        cursos = curso_dao.getCursosParticulares()
         return jsonify({
             'success': True,
-            'data': horarios,
+            'data': cursos,
             'error': None
         }), 200
 
     except Exception as e:
-        app.logger.error(f"Error al obtener los horarios: {str(e)}")
+        app.logger.error(f"Error al obtener los cursos: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Obtener un horario por su ID
-@horarios_api.route('/horarios/<int:horario_id>', methods=['GET'])
-def getHorario(horario_id):
-    horario_dao = HorarioDao()
+# Obtener un curso por su ID
+@cursos_api.route('/cursos/<int:curso_id>', methods=['GET'])
+def getCurso(curso_id):
+    curso_dao = CursoParticularDao()
 
     try:
-        horario = horario_dao.getHorarioById(horario_id)
+        curso = curso_dao.getCursoParticularById(curso_id)
 
-        if horario:
+        if curso:
             return jsonify({
                 'success': True,
-                'data': horario,
+                'data': curso,
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró el horario con el ID proporcionado.'
+                'error': 'No se encontró el curso con el ID proporcionado.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al obtener el horario: {str(e)}")
+        app.logger.error(f"Error al obtener el curso: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Agregar un nuevo horario
-@horarios_api.route('/horarios', methods=['POST'])
-def addHorario():
+# Agregar un nuevo curso
+@cursos_api.route('/cursos', methods=['POST'])
+def addCurso():
     data = request.get_json()
-    horario_dao = HorarioDao()
+    curso_dao = CursoParticularDao()
 
     # Validar que el JSON contenga los campos necesarios
-    campos_requeridos = ['curso', 'nombre_profesor', 'dia', 'hora_inicio', 'hora_fin', 'aula']
+    campos_requeridos = ['curso', 'fecha_inicio', 'fecha_fin', 'precio_mes']
 
     # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
@@ -68,35 +68,34 @@ def addHorario():
             }), 400
 
     try:
-        horario_id = horario_dao.guardarHorario(data['curso'], data['nombre_profesor'], data['dia'], 
-                                                  data['hora_inicio'], data['hora_fin'], data['aula'])
-        if horario_id:
+        curso_id = curso_dao.guardarCursoParticular(data['curso'], data['fecha_inicio'], data['fecha_fin'], data['precio_mes'])
+        if curso_id:
             return jsonify({
                 'success': True,
-                'data': {'id': horario_id, **data},
+                'data': {'id': curso_id, **data},
                 'error': None
             }), 201
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se pudo guardar el horario. Consulte con el administrador.'
+                'error': 'No se pudo guardar el curso. Consulte con el administrador.'
             }), 500
 
     except Exception as e:
-        app.logger.error(f"Error al agregar el horario: {str(e)}")
+        app.logger.error(f"Error al agregar el curso: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Actualizar un horario existente
-@horarios_api.route('/horarios/<int:horario_id>', methods=['PUT'])
-def updateHorario(horario_id):
+# Actualizar un curso existente
+@cursos_api.route('/cursos/<int:curso_id>', methods=['PUT'])
+def updateCurso(curso_id):
     data = request.get_json()
-    horario_dao = HorarioDao()
+    curso_dao = CursoParticularDao()
 
     # Validar que el JSON contenga los campos necesarios
-    campos_requeridos = ['curso', 'nombre_profesor', 'dia', 'hora_inicio', 'hora_fin', 'aula']
+    campos_requeridos = ['curso', 'fecha_inicio', 'fecha_fin', 'precio_mes']
 
     # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
@@ -107,46 +106,45 @@ def updateHorario(horario_id):
             }), 400
 
     try:
-        if horario_dao.updateHorario(horario_id, data['curso'], data['nombre_profesor'], data['dia'], 
-                                      data['hora_inicio'], data['hora_fin'], data['aula']):
+        if curso_dao.updateCursoParticular(curso_id, data['curso'], data['fecha_inicio'], data['fecha_fin'], data['precio_mes']):
             return jsonify({
                 'success': True,
-                'data': {'id': horario_id, **data},
+                'data': {'id': curso_id, **data},
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró el horario con el ID proporcionado o no se pudo actualizar.'
+                'error': 'No se encontró el curso con el ID proporcionado o no se pudo actualizar.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al actualizar el horario: {str(e)}")
+        app.logger.error(f"Error al actualizar el curso: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Eliminar un horario
-@horarios_api.route('/horarios/<int:horario_id>', methods=['DELETE'])
-def deleteHorario(horario_id):
-    horario_dao = HorarioDao()
+# Eliminar un curso
+@cursos_api.route('/cursos/<int:curso_id>', methods=['DELETE'])
+def deleteCurso(curso_id):
+    curso_dao = CursoParticularDao()
 
     try:
-        if horario_dao.deleteHorario(horario_id):
+        if curso_dao.deleteCursoParticular(curso_id):
             return jsonify({
                 'success': True,
-                'mensaje': f'Horario con ID {horario_id} eliminado correctamente.',
+                'mensaje': f'Curso con ID {curso_id} eliminado correctamente.',
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró el horario con el ID proporcionado o no se pudo eliminar.'
+                'error': 'No se encontró el curso con el ID proporcionado o no se pudo eliminar.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al eliminar el horario: {str(e)}")
+        app.logger.error(f"Error al eliminar el curso: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
