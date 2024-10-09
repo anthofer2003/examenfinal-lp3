@@ -1,15 +1,15 @@
 from flask import Blueprint, request, jsonify, current_app as app
 from app.dao.referenciales.pais.PaisDao import PaisDao
 
-paiapi = Blueprint('paiapi', __name__)
+paisapi = Blueprint('paisapi', __name__)
 
-# Trae todas las países
-@paiapi.route('/paises', methods=['GET'])
+# Trae todos los países
+@paisapi.route('/paises', methods=['GET'])
 def getPaises():
-    paidao = PaisDao()
+    paisdao = PaisDao()
 
     try:
-        paises = paidao.getPaises()
+        paises = paisdao.getPaises()
 
         return jsonify({
             'success': True,
@@ -18,18 +18,19 @@ def getPaises():
         }), 200
 
     except Exception as e:
-        app.logger.error(f"Error al obtener todas las países: {str(e)}")
+        app.logger.error(f"Error al obtener todos los países: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-@paiapi.route('/paises/<int:pais_id>', methods=['GET'])
+# Trae un país específico por ID
+@paisapi.route('/paises/<int:pais_id>', methods=['GET'])
 def getPais(pais_id):
-    paidao = PaisDao()
+    paisdao = PaisDao()
 
     try:
-        pais = paidao.getPaisById(pais_id)
+        pais = paisdao.getPaisById(pais_id)
 
         if pais:
             return jsonify({
@@ -51,13 +52,13 @@ def getPais(pais_id):
         }), 500
 
 # Agrega un nuevo país
-@paiapi.route('/paises', methods=['POST'])
+@paisapi.route('/paises', methods=['POST'])
 def addPais():
     data = request.get_json()
-    paidao = PaisDao()
+    paisdao = PaisDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['nombre', 'apellido', 'pais']
+    campos_requeridos = ['descripcion']
 
     # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
@@ -68,15 +69,12 @@ def addPais():
                             }), 400
 
     try:
-        nombre = data['nombre'].upper()
-        apellido = data['apellido'].upper()
-        pais = data['pais'].upper()
-
-        pais_id = paidao.guardarPais(nombre, apellido, pais)
+        descripcion = data['descripcion'].upper()
+        pais_id = paisdao.guardarPais(descripcion)
         if pais_id is not None:
             return jsonify({
                 'success': True,
-                'data': {'id': pais_id, 'nombre': nombre, 'apellido': apellido, 'pais': pais},
+                'data': {'id': pais_id, 'descripcion': descripcion},
                 'error': None
             }), 201
         else:
@@ -88,13 +86,14 @@ def addPais():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-@paiapi.route('/paises/<int:pais_id>', methods=['PUT'])
+# Actualiza un país existente por ID
+@paisapi.route('/paises/<int:pais_id>', methods=['PUT'])
 def updatePais(pais_id):
     data = request.get_json()
-    paidao = PaisDao()
+    paisdao = PaisDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['nombre', 'apellido', 'pais']
+    campos_requeridos = ['descripcion']
 
     # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
@@ -104,14 +103,12 @@ def updatePais(pais_id):
                             'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
                             }), 400
 
-    nombre = data['nombre']
-    apellido = data['apellido']
-    pais = data['pais']
+    descripcion = data['descripcion']
     try:
-        if paidao.updatePais(pais_id, nombre.upper(), apellido.upper(), pais.upper()):
+        if paisdao.updatePais(pais_id, descripcion.upper()):
             return jsonify({
                 'success': True,
-                'data': {'id': pais_id, 'nombre': nombre, 'apellido': apellido, 'pais': pais},
+                'data': {'id': pais_id, 'descripcion': descripcion},
                 'error': None
             }), 200
         else:
@@ -126,12 +123,14 @@ def updatePais(pais_id):
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-@paiapi.route('/paises/<int:pais_id>', methods=['DELETE'])
+# Elimina un país por ID
+@paisapi.route('/paises/<int:pais_id>', methods=['DELETE'])
 def deletePais(pais_id):
-    paidao = PaisDao()
+    paisdao = PaisDao()
 
     try:
-        if paidao.deletePais(pais_id):
+        # Usar el retorno de eliminarPais para determinar el éxito
+        if paisdao.deletePais(pais_id):
             return jsonify({
                 'success': True,
                 'mensaje': f'País con ID {pais_id} eliminado correctamente.',

@@ -48,7 +48,7 @@ app.register_blueprint(certimod, url_prefix=f'{modulo0}/certificado')
 app.register_blueprint(turmod, url_prefix=f'{modulo0}/turno')
 
 from app.rutas.referenciales.ciudad.ciudad_api import ciuapi
-from app.rutas.referenciales.pais.pais_api import paiapi
+from app.rutas.referenciales.pais.pais_api import paisapi
 from app.rutas.referenciales.nacionalidad.nacionalidad_api import nacioapi
 from app.rutas.referenciales.cargo.cargo_api import carapi
 from app.rutas.referenciales.persona.persona_api import perapi
@@ -71,7 +71,7 @@ from app.rutas.referenciales.turno.turno_api import turno_api
 # APIS v1
 version1 = '/api/v1'
 app.register_blueprint(ciuapi, url_prefix=version1)
-app.register_blueprint(paiapi, url_prefix=version1)
+app.register_blueprint(paisapi, url_prefix=version1)
 app.register_blueprint(nacioapi, url_prefix=version1)
 app.register_blueprint(carapi, url_prefix=version1)
 app.register_blueprint(perapi, url_prefix=version1)

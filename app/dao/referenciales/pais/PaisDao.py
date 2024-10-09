@@ -6,25 +6,23 @@ class PaisDao:
 
     def getPaises(self):
         paisSQL = """
-        SELECT id, nombre, apellido, pais
+        SELECT id, descripcion
         FROM paises
         """
-        # objeto conexion
+        # Objeto conexión
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
             cur.execute(paisSQL)
-            # trae datos de la bd
+            # Trae datos de la BD
             lista_paises = cur.fetchall()
-            # retorno los datos
+            # Retorno los datos
             lista_ordenada = []
             for item in lista_paises:
                 lista_ordenada.append({
                     "id": item[0],
-                    "nombre": item[1],
-                    "apellido": item[2],
-                    "pais": item[3]
+                    "descripcion": item[1]
                 })
             return lista_ordenada
         except con.Error as e:
@@ -35,70 +33,78 @@ class PaisDao:
 
     def getPaisById(self, id):
         paisSQL = """
-        SELECT id, nombre, apellido, pais
+        SELECT id, descripcion
         FROM paises WHERE id=%s
         """
-        # objeto conexion
+        # Objeto conexión
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
             cur.execute(paisSQL, (id,))
-            # trae datos de la bd
-            paisEncontrada = cur.fetchone()
-            # retorno los datos
+            # Trae el dato de la BD
+            paisEncontrado = cur.fetchone()
+            # Retorno el dato
             return {
-                "id": paisEncontrada[0],
-                "nombre": paisEncontrada[1],
-                "apellido": paisEncontrada[2],
-                "pais": paisEncontrada[3]
-            }
+                    "id": paisEncontrado[0],
+                    "descripcion": paisEncontrado[1]
+                }
         except con.Error as e:
             app.logger.info(e)
         finally:
             cur.close()
             con.close()
 
-    def guardarPais(self, nombre, apellido, pais):
+    def guardarPais(self, descripcion):
         insertPaisSQL = """
-        INSERT INTO paises(nombre, apellido, pais) VALUES(%s, %s, %s)
+        INSERT INTO paises(descripcion) VALUES(%s)
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
 
-        # Ejecucion exitosa
+        # Ejecución exitosa
         try:
-            cur.execute(insertPaisSQL, (nombre, apellido, pais))
-            # se confirma la insercion
+            cur.execute(insertPaisSQL, (descripcion,))
+            # Confirma la inserción
             con.commit()
+
             return True
+
+        # Si algo falló entra aquí
         except con.Error as e:
             app.logger.info(e)
+
+        # Siempre se va ejecutar
         finally:
             cur.close()
             con.close()
 
         return False
 
-    def updatePais(self, id, nombre, apellido, pais):
+    def updatePais(self, id, descripcion):
         updatePaisSQL = """
         UPDATE paises
-        SET nombre=%s, apellido=%s, pais=%s
+        SET descripcion=%s
         WHERE id=%s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
 
-        # Ejecucion exitosa
+        # Ejecución exitosa
         try:
-            cur.execute(updatePaisSQL, (nombre, apellido, pais, id))
-            # se confirma la actualizacion
+            cur.execute(updatePaisSQL, (descripcion, id,))
+            # Confirma la actualización
             con.commit()
+
             return True
+
+        # Si algo falló entra aquí
         except con.Error as e:
             app.logger.info(e)
+
+        # Siempre se va ejecutar
         finally:
             cur.close()
             con.close()
@@ -114,14 +120,19 @@ class PaisDao:
         con = conexion.getConexion()
         cur = con.cursor()
 
-        # Ejecucion exitosa
+        # Ejecución exitosa
         try:
             cur.execute(deletePaisSQL, (id,))
-            # se confirma la eliminación
+            # Confirma la eliminación
             con.commit()
+
             return True
+
+        # Si algo falló entra aquí
         except con.Error as e:
             app.logger.info(e)
+
+        # Siempre se va ejecutar
         finally:
             cur.close()
             con.close()
