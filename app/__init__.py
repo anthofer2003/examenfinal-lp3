@@ -16,7 +16,6 @@ from app.rutas.referenciales.nota.nota_routes import notamod
 from app.rutas.referenciales.horario.horario_routes import hormod
 from app.rutas.referenciales.evaluacion.evaluacion_routes import evamod
 from app.rutas.referenciales.asignatura.asignatura_routes import asigmod
-from app.rutas.referenciales.producto.producto_routes import producmod
 from app.rutas.referenciales.curso.curso_routes import curmod
 from app.rutas.referenciales.facultad.facultad_routes import facumod
 from app.rutas.referenciales.carrera.carrera_routes import carremod
@@ -39,7 +38,6 @@ app.register_blueprint(notamod, url_prefix=f'{modulo0}/nota')
 app.register_blueprint(hormod, url_prefix=f'{modulo0}/horario')
 app.register_blueprint(evamod, url_prefix=f'{modulo0}/evaluacion')
 app.register_blueprint(asigmod, url_prefix=f'{modulo0}/asignatura')
-app.register_blueprint(producmod, url_prefix=f'{modulo0}/producto')
 app.register_blueprint(curmod, url_prefix=f'{modulo0}/curso')
 app.register_blueprint(facumod, url_prefix=f'{modulo0}/facultad')
 app.register_blueprint(carremod, url_prefix=f'{modulo0}/carrera')
@@ -60,7 +58,6 @@ from app.rutas.referenciales.nota.nota_api import notaapi
 from app.rutas.referenciales.horario.horario_api import horarios_api
 from app.rutas.referenciales.evaluacion.evaluacion_api import evaluacion_api
 from app.rutas.referenciales.asignatura.asignatura_api import asignatura_api
-from app.rutas.referenciales.producto.producto_api import producto_api
 from app.rutas.referenciales.curso.curso_api import cursos_api
 from app.rutas.referenciales.facultad.facultad_api import facultad_api
 from app.rutas.referenciales.carrera.carrera_api import carrera_api
@@ -83,7 +80,6 @@ app.register_blueprint(notaapi, url_prefix=version1)
 app.register_blueprint(horarios_api, url_prefix=version1)
 app.register_blueprint(evaluacion_api, url_prefix=version1)
 app.register_blueprint(asignatura_api, url_prefix=version1)
-app.register_blueprint(producto_api, url_prefix=version1)
 app.register_blueprint(cursos_api, url_prefix=version1)
 app.register_blueprint(facultad_api, url_prefix=version1)
 app.register_blueprint(carrera_api, url_prefix=version1)
