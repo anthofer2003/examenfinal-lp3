@@ -51,7 +51,7 @@ def addPersona():
     data = request.get_json()
     personadao = PersonaDao()
 
-    campos_requeridos = ['nombre', 'apellido', 'numero_de_cedula']
+    campos_requeridos = ['nombre', 'apellido', 'numero_de_cedula', 'fecha_nac', 'sexo']
     for campo in campos_requeridos:
         if campo not in data or not data[campo].strip():
             return jsonify({
@@ -63,12 +63,21 @@ def addPersona():
         nombre = data['nombre'].strip()
         apellido = data['apellido'].strip()
         numero_de_cedula = data['numero_de_cedula'].strip()
+        fecha_nac = data['fecha_nac'].strip()
+        sexo = data['sexo'].strip()
 
-        persona_id = personadao.guardarPersona(nombre, apellido, numero_de_cedula)
+        persona_id = personadao.guardarPersona(nombre, apellido, numero_de_cedula, fecha_nac, sexo)
         if persona_id:
             return jsonify({
                 'success': True,
-                'data': {'id': persona_id, 'nombre': nombre, 'apellido': apellido, 'numero_de_cedula': numero_de_cedula},
+                'data': {
+                    'id': persona_id, 
+                    'nombre': nombre, 
+                    'apellido': apellido, 
+                    'numero_de_cedula': numero_de_cedula,
+                    'fecha_nac': fecha_nac,
+                    'sexo': sexo
+                },
                 'error': None
             }), 201
         else:
@@ -89,7 +98,7 @@ def updatePersona(persona_id):
     data = request.get_json()
     personadao = PersonaDao()
 
-    campos_requeridos = ['nombre', 'apellido', 'numero_de_cedula']
+    campos_requeridos = ['nombre', 'apellido', 'numero_de_cedula', 'fecha_nac', 'sexo']
     for campo in campos_requeridos:
         if campo not in data or not data[campo].strip():
             return jsonify({
@@ -101,11 +110,20 @@ def updatePersona(persona_id):
         nombre = data['nombre'].strip()
         apellido = data['apellido'].strip()
         numero_de_cedula = data['numero_de_cedula'].strip()
+        fecha_nac = data['fecha_nac'].strip()
+        sexo = data['sexo'].strip()
 
-        if personadao.updatePersona(persona_id, nombre, apellido, numero_de_cedula):
+        if personadao.updatePersona(persona_id, nombre, apellido, numero_de_cedula, fecha_nac, sexo):
             return jsonify({
                 'success': True,
-                'data': {'id': persona_id, 'nombre': nombre, 'apellido': apellido, 'numero_de_cedula': numero_de_cedula},
+                'data': {
+                    'id': persona_id, 
+                    'nombre': nombre, 
+                    'apellido': apellido, 
+                    'numero_de_cedula': numero_de_cedula,
+                    'fecha_nac': fecha_nac,
+                    'sexo': sexo
+                },
                 'error': None
             }), 200
         else:

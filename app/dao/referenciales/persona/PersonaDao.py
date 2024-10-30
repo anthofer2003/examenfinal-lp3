@@ -6,7 +6,7 @@ class PersonaDao:
 
     def getPersonas(self):
         personasSQL = """
-        SELECT id, nombre, apellido, numero_de_cedula
+        SELECT id, nombre, apellido, numero_de_cedula, fecha_nac, sexo
         FROM personas
         """
         # Objeto conexion
@@ -22,7 +22,9 @@ class PersonaDao:
                     "id": item[0],
                     "nombre": item[1],
                     "apellido": item[2],
-                    "numero_de_cedula": item[3]
+                    "numero_de_cedula": item[3],
+                    "fecha_nac": item[4],
+                    "sexo": item[5]
                 })
             return lista_ordenada
         except con.Error as e:
@@ -33,7 +35,7 @@ class PersonaDao:
 
     def getPersonaById(self, id):
         personaSQL = """
-        SELECT id, nombre, apellido, numero_de_cedula
+        SELECT id, nombre, apellido, numero_de_cedula, fecha_nac, sexo
         FROM personas WHERE id=%s
         """
         conexion = Conexion()
@@ -46,7 +48,9 @@ class PersonaDao:
                 "id": personaEncontrada[0],
                 "nombre": personaEncontrada[1],
                 "apellido": personaEncontrada[2],
-                "numero_de_cedula": personaEncontrada[3]
+                "numero_de_cedula": personaEncontrada[3],
+                "fecha_nac": personaEncontrada[4],
+                "sexo": personaEncontrada[5]
             }
         except con.Error as e:
             app.logger.info(e)
@@ -54,16 +58,16 @@ class PersonaDao:
             cur.close()
             con.close()
 
-    def guardarPersona(self, nombre, apellido, numero_de_cedula):
+    def guardarPersona(self, nombre, apellido, numero_de_cedula, fecha_nac, sexo):
         insertPersonaSQL = """
-        INSERT INTO personas(nombre, apellido, numero_de_cedula) 
-        VALUES(%s, %s, %s)
+        INSERT INTO personas(nombre, apellido, numero_de_cedula, fecha_nac, sexo) 
+        VALUES(%s, %s, %s, %s, %s)
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(insertPersonaSQL, (nombre, apellido, numero_de_cedula))
+            cur.execute(insertPersonaSQL, (nombre, apellido, numero_de_cedula, fecha_nac, sexo))
             con.commit()
             return True
         except con.Error as e:
@@ -74,17 +78,17 @@ class PersonaDao:
 
         return False
 
-    def updatePersona(self, id, nombre, apellido, numero_de_cedula):
+    def updatePersona(self, id, nombre, apellido, numero_de_cedula, fecha_nac, sexo):
         updatePersonaSQL = """
         UPDATE personas
-        SET nombre=%s, apellido=%s, numero_de_cedula=%s
+        SET nombre=%s, apellido=%s, numero_de_cedula=%s, fecha_nac=%s, sexo=%s
         WHERE id=%s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(updatePersonaSQL, (nombre, apellido, numero_de_cedula, id))
+            cur.execute(updatePersonaSQL, (nombre, apellido, numero_de_cedula, fecha_nac, sexo, id))
             con.commit()
             return True
         except con.Error as e:
