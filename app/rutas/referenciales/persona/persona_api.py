@@ -1,14 +1,15 @@
 from flask import Blueprint, request, jsonify, current_app as app
 from app.dao.referenciales.persona.PersonaDao import PersonaDao
+from datetime import datetime
 
-perapi = Blueprint('perapi', __name__)
+persona_api = Blueprint('persona_api', __name__)
 
 # Trae todas las personas
-@perapi.route('/personas', methods=['GET'])
+@persona_api.route('/personas', methods=['GET'])
 def getPersonas():
-    personadao = PersonaDao()
+    persona_dao = PersonaDao()
     try:
-        personas = personadao.getPersonas()
+        personas = persona_dao.getPersonas()
         return jsonify({
             'success': True,
             'data': personas,
@@ -22,11 +23,11 @@ def getPersonas():
         }), 500
 
 # Trae una persona por ID
-@perapi.route('/personas/<int:persona_id>', methods=['GET'])
-def getPersona(persona_id):
-    personadao = PersonaDao()
+@persona_api.route('/personas/<int:id_persona>', methods=['GET'])
+def getPersona(id_persona):
+    persona_dao = PersonaDao()
     try:
-        persona = personadao.getPersonaById(persona_id)
+        persona = persona_dao.getPersonaById(id_persona)
         if persona:
             return jsonify({
                 'success': True,
@@ -46,38 +47,39 @@ def getPersona(persona_id):
         }), 500
 
 # Agrega una nueva persona
-@perapi.route('/personas', methods=['POST'])
+@persona_api.route('/personas', methods=['POST'])
 def addPersona():
     data = request.get_json()
-    personadao = PersonaDao()
+    persona_dao = PersonaDao()
 
-    campos_requeridos = ['nombre', 'apellido', 'numero_de_cedula', 'fecha_nac', 'sexo']
+    # Validar que el JSON no esté vacío y tenga las propiedades necesarias
+    campos_requeridos = ['nombres', 'apellidos', 'ci', 'fechanac', 'creacion_usuario']
+
     for campo in campos_requeridos:
-        if campo not in data or not data[campo].strip():
+        if campo not in data or data[campo] is None or len(data[campo].strip()) == 0:
             return jsonify({
                 'success': False,
                 'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
             }), 400
 
     try:
-        nombre = data['nombre'].strip()
-        apellido = data['apellido'].strip()
-        numero_de_cedula = data['numero_de_cedula'].strip()
-        fecha_nac = data['fecha_nac'].strip()
-        sexo = data['sexo'].strip()
+        # Obtiene la fecha y hora de creación
+        creacion_fecha = datetime.now().date()
+        creacion_hora = datetime.now().time()
 
-        persona_id = personadao.guardarPersona(nombre, apellido, numero_de_cedula, fecha_nac, sexo)
-        if persona_id:
+        id_persona = persona_dao.guardarPersona(
+            data['nombres'],
+            data['apellidos'],
+            data['ci'],
+            data['fechanac'],
+            creacion_fecha,
+            creacion_hora,
+            data['creacion_usuario']
+        )
+        if id_persona:
             return jsonify({
                 'success': True,
-                'data': {
-                    'id': persona_id, 
-                    'nombre': nombre, 
-                    'apellido': apellido, 
-                    'numero_de_cedula': numero_de_cedula,
-                    'fecha_nac': fecha_nac,
-                    'sexo': sexo
-                },
+                'data': {'id_persona': id_persona},
                 'error': None
             }), 201
         else:
@@ -92,38 +94,33 @@ def addPersona():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Actualiza una persona por ID
-@perapi.route('/personas/<int:persona_id>', methods=['PUT'])
-def updatePersona(persona_id):
+# Actualiza una persona existente
+@persona_api.route('/personas/<int:id_persona>', methods=['PUT'])
+def updatePersona(id_persona):
     data = request.get_json()
-    personadao = PersonaDao()
+    persona_dao = PersonaDao()
 
-    campos_requeridos = ['nombre', 'apellido', 'numero_de_cedula', 'fecha_nac', 'sexo']
+    # Validar que el JSON no esté vacío y tenga las propiedades necesarias
+    campos_requeridos = ['nombres', 'apellidos', 'ci', 'fechanac']
+
     for campo in campos_requeridos:
-        if campo not in data or not data[campo].strip():
+        if campo not in data or data[campo] is None or len(data[campo].strip()) == 0:
             return jsonify({
                 'success': False,
                 'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
             }), 400
 
     try:
-        nombre = data['nombre'].strip()
-        apellido = data['apellido'].strip()
-        numero_de_cedula = data['numero_de_cedula'].strip()
-        fecha_nac = data['fecha_nac'].strip()
-        sexo = data['sexo'].strip()
-
-        if personadao.updatePersona(persona_id, nombre, apellido, numero_de_cedula, fecha_nac, sexo):
+        if persona_dao.updatePersona(
+            id_persona,
+            data['nombres'],
+            data['apellidos'],
+            data['ci'],
+            data['fechanac']
+        ):
             return jsonify({
                 'success': True,
-                'data': {
-                    'id': persona_id, 
-                    'nombre': nombre, 
-                    'apellido': apellido, 
-                    'numero_de_cedula': numero_de_cedula,
-                    'fecha_nac': fecha_nac,
-                    'sexo': sexo
-                },
+                'data': {'id_persona': id_persona},
                 'error': None
             }), 200
         else:
@@ -138,15 +135,15 @@ def updatePersona(persona_id):
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Elimina una persona por ID
-@perapi.route('/personas/<int:persona_id>', methods=['DELETE'])
-def deletePersona(persona_id):
-    personadao = PersonaDao()
+# Elimina una persona
+@persona_api.route('/personas/<int:id_persona>', methods=['DELETE'])
+def deletePersona(id_persona):
+    persona_dao = PersonaDao()
     try:
-        if personadao.deletePersona(persona_id):
+        if persona_dao.deletePersona(id_persona):
             return jsonify({
                 'success': True,
-                'mensaje': f'Persona con ID {persona_id} eliminada correctamente.',
+                'mensaje': f'Persona con ID {id_persona} eliminada correctamente.',
                 'error': None
             }), 200
         else:

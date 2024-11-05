@@ -1,19 +1,21 @@
 from flask import Blueprint, request, jsonify, current_app as app
 from app.dao.referenciales.profesor.ProfesorDao import ProfesorDao
 
-profesorapi = Blueprint('profesorapi', __name__)
+profesor_api = Blueprint('profesor_api', __name__)
 
 # Trae todos los profesores
-@profesorapi.route('/profesores', methods=['GET'])
+@profesor_api.route('/profesores', methods=['GET'])
 def getProfesores():
-    profesordao = ProfesorDao()
+    profesor_dao = ProfesorDao()
+
     try:
-        profesores = profesordao.getProfesores()
+        profesores = profesor_dao.getProfesores()
         return jsonify({
             'success': True,
             'data': profesores,
             'error': None
         }), 200
+
     except Exception as e:
         app.logger.error(f"Error al obtener todos los profesores: {str(e)}")
         return jsonify({
@@ -21,12 +23,13 @@ def getProfesores():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Trae un profesor específico
-@profesorapi.route('/profesores/<int:id_profesor>', methods=['GET'])
+@profesor_api.route('/profesores/<int:id_profesor>', methods=['GET'])
 def getProfesor(id_profesor):
-    profesordao = ProfesorDao()
+    profesor_dao = ProfesorDao()
+
     try:
-        profesor = profesordao.getProfesorById(id_profesor)
+        profesor = profesor_dao.getProfesorById(id_profesor)
+
         if profesor:
             return jsonify({
                 'success': True,
@@ -38,6 +41,7 @@ def getProfesor(id_profesor):
                 'success': False,
                 'error': 'No se encontró el profesor con el ID proporcionado.'
             }), 404
+
     except Exception as e:
         app.logger.error(f"Error al obtener profesor: {str(e)}")
         return jsonify({
@@ -46,13 +50,13 @@ def getProfesor(id_profesor):
         }), 500
 
 # Agrega un nuevo profesor
-@profesorapi.route('/profesores', methods=['POST'])
+@profesor_api.route('/profesores', methods=['POST'])
 def addProfesor():
     data = request.get_json()
-    profesordao = ProfesorDao()
+    profesor_dao = ProfesorDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['nombre_profesor', 'apellido_profesor', 'titulo_academico', 'correo', 'telefono']
+    campos_requeridos = ['id_persona', 'asignatura', 'salario']
 
     # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
@@ -63,16 +67,11 @@ def addProfesor():
             }), 400
 
     try:
-        nombre_profesor = data['nombre_profesor']
-        apellido_profesor = data['apellido_profesor']
-        titulo_academico = data['titulo_academico']
-        correo = data['correo']
-        telefono = data['telefono']
-        
-        if profesordao.guardarProfesor(nombre_profesor, apellido_profesor, titulo_academico, correo, telefono):
+        id_profesor = profesor_dao.guardarProfesor(data['id_persona'], data['asignatura'], data['salario'])
+        if id_profesor:
             return jsonify({
                 'success': True,
-                'data': {'nombre_profesor': nombre_profesor, 'apellido_profesor': apellido_profesor},
+                'data': {'id_profesor': id_profesor},
                 'error': None
             }), 201
         else:
@@ -84,14 +83,13 @@ def addProfesor():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Actualiza un profesor existente
-@profesorapi.route('/profesores/<int:id_profesor>', methods=['PUT'])
+@profesor_api.route('/profesores/<int:id_profesor>', methods=['PUT'])
 def updateProfesor(id_profesor):
     data = request.get_json()
-    profesordao = ProfesorDao()
+    profesor_dao = ProfesorDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['nombre_profesor', 'apellido_profesor', 'titulo_academico', 'correo', 'telefono']
+    campos_requeridos = ['asignatura', 'salario']
 
     # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
@@ -100,18 +98,12 @@ def updateProfesor(id_profesor):
                 'success': False,
                 'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
             }), 400
-            
-    nombre_profesor = data['nombre_profesor']
-    apellido_profesor = data['apellido_profesor']
-    titulo_academico = data['titulo_academico']
-    correo = data['correo']
-    telefono = data['telefono']
 
     try:
-        if profesordao.updateProfesor(id_profesor, nombre_profesor, apellido_profesor, titulo_academico, correo, telefono):
+        if profesor_dao.updateProfesor(id_profesor, data['asignatura'], data['salario']):
             return jsonify({
                 'success': True,
-                'data': {'id_profesor': id_profesor, 'nombre_profesor': nombre_profesor},
+                'data': {'id_profesor': id_profesor},
                 'error': None
             }), 200
         else:
@@ -126,13 +118,12 @@ def updateProfesor(id_profesor):
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Elimina un profesor
-@profesorapi.route('/profesores/<int:id_profesor>', methods=['DELETE'])
+@profesor_api.route('/profesores/<int:id_profesor>', methods=['DELETE'])
 def deleteProfesor(id_profesor):
-    profesordao = ProfesorDao()
+    profesor_dao = ProfesorDao()
 
     try:
-        if profesordao.deleteProfesor(id_profesor):
+        if profesor_dao.deleteProfesor(id_profesor):
             return jsonify({
                 'success': True,
                 'mensaje': f'Profesor con ID {id_profesor} eliminado correctamente.',

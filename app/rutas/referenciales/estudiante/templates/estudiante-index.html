@@ -17,11 +17,8 @@ Estudiantes
             <table class="table table-striped" id="tbl">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th>Fecha de Nacimiento</th>
-                        <th>Teléfono</th>
-                        <th>Dirección</th>
+                        <th>ID Persona</th>
+                        <th>Curso</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -46,24 +43,12 @@ Estudiantes
                 <div class="modal-body">
                     <div class="form-group">
                         <input type="hidden" id="txtIdEstudiante">
-                        <label for="txtNombre">Nombre:</label>
-                        <input type="text" class="form-control" placeholder="Ingrese el nombre" id="txtNombre">
+                        <label for="txtIdPersona">ID Persona:</label>
+                        <input type="number" class="form-control" placeholder="Ingrese el ID de la persona" id="txtIdPersona">
                     </div>
                     <div class="form-group">
-                        <label for="txtApellido">Apellido:</label>
-                        <input type="text" class="form-control" placeholder="Ingrese el apellido" id="txtApellido">
-                    </div>
-                    <div class="form-group">
-                        <label for="txtFechaNacimiento">Fecha de Nacimiento:</label>
-                        <input type="date" class="form-control" id="txtFechaNacimiento">
-                    </div>
-                    <div class="form-group">
-                        <label for="txtTelefono">Teléfono:</label>
-                        <input type="text" class="form-control" placeholder="Ingrese el teléfono" id="txtTelefono">
-                    </div>
-                    <div class="form-group">
-                        <label for="txtDireccion">Dirección:</label>
-                        <input type="text" class="form-control" placeholder="Ingrese la dirección" id="txtDireccion">
+                        <label for="txtCurso">Curso:</label>
+                        <input type="text" class="form-control" placeholder="Ingrese el curso" id="txtCurso">
                     </div>
                 </div>
 
@@ -95,31 +80,25 @@ Estudiantes
             language: {
                 url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
             },
-            ajax: '/api/v1/estudiantes',  // Cambia la URL a la de estudiantes
+            ajax: '/api/v1/estudiantes', // URL de la API para obtener los estudiantes
             columns: [
-                { data: 'nombre' },
-                { data: 'apellido' },
-                { data: 'fecha_nacimiento' },
-                { data: 'telefono' },
-                { data: 'direccion' },
+                { data: 'id_estudiante' },
+                { data: 'curso' },
                 { data: function(row) {
-                        return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
-                                <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
-                    }
+                    return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id_estudiante}">Editar</button>
+                            <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_estudiante}">Eliminar</button>`;
                 }
+            }
             ]
         });
     }
 
     const agregar = () => {
-        $('#btnAgregar').on('click', function(){
+        $('#btnAgregar').on('click', function() {
             $('#modalTitle').text("Agregar un Estudiante");
             $('#txtIdEstudiante').val("");
-            $('#txtNombre').val("");
-            $('#txtApellido').val("");
-            $('#txtFechaNacimiento').val("");
-            $('#txtTelefono').val("");
-            $('#txtDireccion').val("");
+            $('#txtIdPersona').val("");
+            $('#txtCurso').val("");
             $('#modalFormulario').modal();
         });
     }
@@ -127,33 +106,27 @@ Estudiantes
     const guardar = () => {
         $('#btnGuardar').on('click', function() {
             const idEstudiante = $('#txtIdEstudiante').val();
-            const nuevoNombre = $('#txtNombre').val();
-            const nuevoApellido = $('#txtApellido').val();
-            const nuevaFechaNacimiento = $('#txtFechaNacimiento').val();
-            const nuevoTelefono = $('#txtTelefono').val();
-            const nuevaDireccion = $('#txtDireccion').val();
+            const idPersona = $('#txtIdPersona').val();
+            const curso = $('#txtCurso').val();
             const tabla = $('#tbl').DataTable();
 
-            const data = { 
-                nombre: nuevoNombre, 
-                apellido: nuevoApellido, 
-                fecha_nacimiento: nuevaFechaNacimiento,
-                telefono: nuevoTelefono,
-                direccion: nuevaDireccion
+            const data = {
+                id_persona: idPersona,
+                curso: curso
             };
 
-            if(idEstudiante) {
+            if (idEstudiante) {
                 // Update
                 fetch(`/api/v1/estudiantes/${idEstudiante}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
-                    }, 
+                    },
                     body: JSON.stringify(data)
                 })
                 .then(resp => resp.json())
                 .then(data => {
-                    if(data && !data.error && data.success) {
+                    if (data && !data.error && data.success) {
                         tabla.ajax.reload();
                         Swal.fire("Actualizado", "El estudiante ha sido actualizado correctamente.", "success");
                     } else {
@@ -168,12 +141,12 @@ Estudiantes
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    }, 
+                    },
                     body: JSON.stringify(data)
                 })
                 .then(resp => resp.json())
                 .then(data => {
-                    if(data && !data.error && data.success) {
+                    if (data && !data.error && data.success) {
                         tabla.ajax.reload();
                         Swal.fire("Agregado", "El estudiante ha sido agregado correctamente.", "success");
                     } else {
@@ -183,52 +156,42 @@ Estudiantes
                     Swal.fire("Error", "Ocurrió un error al guardar el estudiante.", "error");
                 });
             }
+
             $('#modalFormulario').modal("hide");
         });
     }
 
     const editar = () => {
-        $('#tbl').on('click', 'button[name="btn_editar"]',function(){
-            Swal.fire({
-                title: "¿Deseas editar este registro?",
-                showCancelButton: true,
-                confirmButtonText: "Si",
-                cancelButtonText: `No`
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $('#modalTitle').text("Editar un Estudiante");
+        $('#tbl').on('click', 'button[name="btn_editar"]', function() {
+            const idEstudiante = $(this).data('id');
+            $('#modalTitle').text("Editar un Estudiante");
 
-                    const idEstudiante = $(this).data('id');
+            fetch(`/api/v1/estudiantes/${idEstudiante}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                if (data && data.success) {
                     $('#txtIdEstudiante').val(idEstudiante);
-
-                    fetch(`/api/v1/estudiantes/${idEstudiante}`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(resp => resp.json())
-                    .then(data => {
-                        $('#txtNombre').val(data.data.nombre);
-                        $('#txtApellido').val(data.data.apellido);
-                        $('#txtFechaNacimiento').val(data.data.fecha_nacimiento);
-                        $('#txtTelefono').val(data.data.telefono);
-                        $('#txtDireccion').val(data.data.direccion);
-                        $('#modalFormulario').modal();
-                    });
+                    $('#txtIdPersona').val(data.data.id_persona);
+                    $('#txtCurso').val(data.data.curso);
+                    $('#modalFormulario').modal();
                 }
             });
         });
     }
 
     const eliminar = () => {
-        $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
+        $('#tbl').on('click', 'button[name="btn_eliminar"]', function() {
             const idEstudiante = $(this).data('id');
             Swal.fire({
-                title: "¿Deseas eliminar este registro?",
+                title: "¿Desea eliminar este registro?",
                 showCancelButton: true,
-                confirmButtonText: "Si",
-                cancelButtonText: `No`
+                confirmButtonText: "Sí",
+                cancelButtonText: "No"
             }).then((result) => {
                 if (result.isConfirmed) {
                     fetch(`/api/v1/estudiantes/${idEstudiante}`, {
@@ -239,10 +202,9 @@ Estudiantes
                     })
                     .then(resp => resp.json())
                     .then(data => {
-                        if(data && !data.error && data.success) {
-                            const fila = $(this).closest('tr');
+                        if (data && !data.error && data.success) {
                             const tabla = $('#tbl').DataTable();
-                            tabla.row(fila).remove().draw();
+                            tabla.row($(this).closest('tr')).remove().draw();
                             Swal.fire("Eliminado", "", "success");
                         } else {
                             Swal.fire(data.error);

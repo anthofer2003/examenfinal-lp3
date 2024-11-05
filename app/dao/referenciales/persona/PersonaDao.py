@@ -1,30 +1,32 @@
-# Data access object - DAO
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
+from datetime import datetime  # Importa el módulo datetime
 
 class PersonaDao:
 
     def getPersonas(self):
-        personasSQL = """
-        SELECT id, nombre, apellido, numero_de_cedula, fecha_nac, sexo
+        personaSQL = """
+        SELECT id_persona, nombres, apellidos, ci, fechanac, 
+               creacion_fecha, creacion_hora, creacion_usuario
         FROM personas
         """
-        # Objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(personasSQL)
+            cur.execute(personaSQL)
             lista_personas = cur.fetchall()
             lista_ordenada = []
             for item in lista_personas:
                 lista_ordenada.append({
-                    "id": item[0],
-                    "nombre": item[1],
-                    "apellido": item[2],
-                    "numero_de_cedula": item[3],
-                    "fecha_nac": item[4],
-                    "sexo": item[5]
+                    "id_persona": item[0],
+                    "nombres": item[1],
+                    "apellidos": item[2],
+                    "ci": item[3],
+                    "fechanac": item[4],
+                    "creacion_fecha": item[5].strftime("%m/%d/%Y, %H:%M:%S"),
+                    "creacion_hora": item[6].strftime("%m/%d/%Y, %H:%M:%S"),
+                    "creacion_usuario": item[7]
                 })
             return lista_ordenada
         except con.Error as e:
@@ -33,41 +35,52 @@ class PersonaDao:
             cur.close()
             con.close()
 
-    def getPersonaById(self, id):
+    def getPersonaById(self, id_persona):
         personaSQL = """
-        SELECT id, nombre, apellido, numero_de_cedula, fecha_nac, sexo
-        FROM personas WHERE id=%s
+        SELECT id_persona, nombres, apellidos, ci, fechanac, 
+               creacion_fecha, creacion_hora, creacion_usuario
+        FROM personas WHERE id_persona=%s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(personaSQL, (id,))
+            cur.execute(personaSQL, (id_persona,))
             personaEncontrada = cur.fetchone()
-            return {
-                "id": personaEncontrada[0],
-                "nombre": personaEncontrada[1],
-                "apellido": personaEncontrada[2],
-                "numero_de_cedula": personaEncontrada[3],
-                "fecha_nac": personaEncontrada[4],
-                "sexo": personaEncontrada[5]
-            }
+            if personaEncontrada:
+                return {
+                    "id_persona": personaEncontrada[0],
+                    "nombres": personaEncontrada[1],
+                    "apellidos": personaEncontrada[2],
+                    "ci": personaEncontrada[3],
+                    "fechanac": personaEncontrada[4],
+                    "creacion_fecha": personaEncontrada[5].strftime("%m/%d/%Y, %H:%M:%S"),
+                    "creacion_hora": personaEncontrada[6].strftime("%m/%d/%Y, %H:%M:%S"),
+                    "creacion_usuario": personaEncontrada[7]
+                }
+            return None
         except con.Error as e:
             app.logger.info(e)
         finally:
             cur.close()
             con.close()
 
-    def guardarPersona(self, nombre, apellido, numero_de_cedula, fecha_nac, sexo):
+    def guardarPersona(self, nombres, apellidos, ci, fechanac, creacion_usuario):
         insertPersonaSQL = """
-        INSERT INTO personas(nombre, apellido, numero_de_cedula, fecha_nac, sexo) 
-        VALUES(%s, %s, %s, %s, %s)
+        INSERT INTO personas(nombres, apellidos, ci, fechanac, 
+                             creacion_fecha, creacion_hora, 
+                             creacion_usuario) 
+        VALUES(%s, %s, %s, %s, %s, %s, %s)
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(insertPersonaSQL, (nombre, apellido, numero_de_cedula, fecha_nac, sexo))
+            # Obtiene la fecha y hora actuales
+            creacion_fecha = datetime.now().date()
+            creacion_hora = datetime.now().time()
+            
+            cur.execute(insertPersonaSQL, (nombres, apellidos, ci, fechanac, creacion_fecha, creacion_hora, creacion_usuario))
             con.commit()
             return True
         except con.Error as e:
@@ -78,17 +91,17 @@ class PersonaDao:
 
         return False
 
-    def updatePersona(self, id, nombre, apellido, numero_de_cedula, fecha_nac, sexo):
+    def updatePersona(self, id_persona, nombres, apellidos, ci, fechanac):
         updatePersonaSQL = """
         UPDATE personas
-        SET nombre=%s, apellido=%s, numero_de_cedula=%s, fecha_nac=%s, sexo=%s
-        WHERE id=%s
+        SET nombres=%s, apellidos=%s, ci=%s, fechanac=%s
+        WHERE id_persona=%s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(updatePersonaSQL, (nombre, apellido, numero_de_cedula, fecha_nac, sexo, id))
+            cur.execute(updatePersonaSQL, (nombres, apellidos, ci, fechanac, id_persona))
             con.commit()
             return True
         except con.Error as e:
@@ -99,16 +112,16 @@ class PersonaDao:
 
         return False
 
-    def deletePersona(self, id):
+    def deletePersona(self, id_persona):
         deletePersonaSQL = """
         DELETE FROM personas
-        WHERE id=%s
+        WHERE id_persona=%s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(deletePersonaSQL, (id,))
+            cur.execute(deletePersonaSQL, (id_persona,))
             con.commit()
             return True
         except con.Error as e:

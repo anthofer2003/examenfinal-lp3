@@ -23,14 +23,13 @@ def getEstudiantes():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Trae un estudiante por ID
-@estudiante_api.route('/estudiantes/<int:estudiante_id>', methods=['GET'])
-def getEstudiante(estudiante_id):
+# Obtener un estudiante específico por ID
+@estudiante_api.route('/estudiantes/<int:id_estudiante>', methods=['GET'])
+def getEstudiante(id_estudiante):
     estudiante_dao = EstudianteDao()
 
     try:
-        estudiante = estudiante_dao.getEstudianteById(estudiante_id)
-
+        estudiante = estudiante_dao.getEstudianteById(id_estudiante)
         if estudiante:
             return jsonify({
                 'success': True,
@@ -50,48 +49,31 @@ def getEstudiante(estudiante_id):
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Agrega un nuevo estudiante
+# Agregar un nuevo estudiante
 @estudiante_api.route('/estudiantes', methods=['POST'])
 def addEstudiante():
     data = request.get_json()
     estudiante_dao = EstudianteDao()
 
-    # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['nombre', 'apellido', 'fecha_nacimiento', 'telefono', 'direccion']
-
-    # Verificar si faltan campos o son vacíos
+    # Validar campos obligatorios
+    campos_requeridos = ['id_persona', 'curso']
     for campo in campos_requeridos:
-        if campo not in data or data[campo] is None or len(data[campo].strip()) == 0:
+        if campo not in data or data[campo] is None or len(str(data[campo]).strip()) == 0:
             return jsonify({
                 'success': False,
                 'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
             }), 400
 
     try:
-        nombre = data['nombre'].upper()
-        apellido = data['apellido'].upper()
-        fecha_nacimiento = data['fecha_nacimiento']  # Asegúrate de que este dato esté en el formato correcto
-        telefono = data['telefono']
-        direccion = data['direccion'].upper()
-
-        if estudiante_dao.guardarEstudiante(nombre, apellido, fecha_nacimiento, telefono, direccion):
+        id_estudiante = estudiante_dao.guardarEstudiante(data['id_persona'], data['curso'])
+        if id_estudiante:
             return jsonify({
                 'success': True,
-                'data': {
-                    'nombre': nombre,
-                    'apellido': apellido,
-                    'fecha_nacimiento': fecha_nacimiento,
-                    'telefono': telefono,
-                    'direccion': direccion
-                },
+                'data': {'id_estudiante': id_estudiante},
                 'error': None
             }), 201
         else:
-            return jsonify({
-                'success': False,
-                'error': 'No se pudo guardar el estudiante. Consulte con el administrador.'
-            }), 500
-
+            return jsonify({'success': False, 'error': 'No se pudo guardar el estudiante. Consulte con el administrador.'}), 500
     except Exception as e:
         app.logger.error(f"Error al agregar estudiante: {str(e)}")
         return jsonify({
@@ -99,41 +81,26 @@ def addEstudiante():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Actualiza un estudiante
-@estudiante_api.route('/estudiantes/<int:estudiante_id>', methods=['PUT'])
-def updateEstudiante(estudiante_id):
+# Actualizar un estudiante
+@estudiante_api.route('/estudiantes/<int:id_estudiante>', methods=['PUT'])
+def updateEstudiante(id_estudiante):
     data = request.get_json()
     estudiante_dao = EstudianteDao()
 
-    # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['nombre', 'apellido', 'fecha_nacimiento', 'telefono', 'direccion']
-
-    # Verificar si faltan campos o son vacíos
+    # Validar campos obligatorios
+    campos_requeridos = ['curso']
     for campo in campos_requeridos:
-        if campo not in data or data[campo] is None or len(data[campo].strip()) == 0:
+        if campo not in data or data[campo] is None or len(str(data[campo]).strip()) == 0:
             return jsonify({
                 'success': False,
                 'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
             }), 400
 
-    nombre = data['nombre'].upper()
-    apellido = data['apellido'].upper()
-    fecha_nacimiento = data['fecha_nacimiento']
-    telefono = data['telefono']
-    direccion = data['direccion'].upper()
-
     try:
-        if estudiante_dao.updateEstudiante(estudiante_id, nombre, apellido, fecha_nacimiento, telefono, direccion):
+        if estudiante_dao.updateEstudiante(id_estudiante, data['curso']):
             return jsonify({
                 'success': True,
-                'data': {
-                    'id': estudiante_id,
-                    'nombre': nombre,
-                    'apellido': apellido,
-                    'fecha_nacimiento': fecha_nacimiento,
-                    'telefono': telefono,
-                    'direccion': direccion
-                },
+                'data': {'id_estudiante': id_estudiante},
                 'error': None
             }), 200
         else:
@@ -148,16 +115,16 @@ def updateEstudiante(estudiante_id):
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Elimina un estudiante
-@estudiante_api.route('/estudiantes/<int:estudiante_id>', methods=['DELETE'])
-def deleteEstudiante(estudiante_id):
+# Eliminar un estudiante
+@estudiante_api.route('/estudiantes/<int:id_estudiante>', methods=['DELETE'])
+def deleteEstudiante(id_estudiante):
     estudiante_dao = EstudianteDao()
 
     try:
-        if estudiante_dao.deleteEstudiante(estudiante_id):
+        if estudiante_dao.deleteEstudiante(id_estudiante):
             return jsonify({
                 'success': True,
-                'mensaje': f'Estudiante con ID {estudiante_id} eliminado correctamente.',
+                'mensaje': f'Estudiante con ID {id_estudiante} eliminado correctamente.',
                 'error': None
             }), 200
         else:

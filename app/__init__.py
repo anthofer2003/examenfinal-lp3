@@ -5,18 +5,9 @@ app = Flask(__name__)
 # importar referenciales
 from app.rutas.referenciales.ciudad.ciudad_routes import ciumod
 from app.rutas.referenciales.pais.pais_routes import paimod
-from app.rutas.referenciales.nacionalidad.nacionalidad_routes import naciomod
-from app.rutas.referenciales.cargo.cargo_routes import carmod
-from app.rutas.referenciales.persona.persona_routes import permod
+from app.rutas.referenciales.persona.persona_routes import persomod
 from app.rutas.referenciales.estudiante.estudiante_routes import estumod
-from app.rutas.referenciales.programa.programa_routes import promod
 from app.rutas.referenciales.profesor.profesor_routes import profemod
-from app.rutas.referenciales.matricula.matricula_routes import matmod
-from app.rutas.referenciales.nota.nota_routes import notamod
-from app.rutas.referenciales.horario.horario_routes import hormod
-from app.rutas.referenciales.evaluacion.evaluacion_routes import evamod
-from app.rutas.referenciales.asignatura.asignatura_routes import asigmod
-from app.rutas.referenciales.curso.curso_routes import curmod
 from app.rutas.referenciales.facultad.facultad_routes import facumod
 from app.rutas.referenciales.carrera.carrera_routes import carremod
 from app.rutas.referenciales.examen.examen_routes import examod
@@ -27,18 +18,9 @@ from app.rutas.referenciales.turno.turno_routes import turmod
 modulo0 = '/referenciales'
 app.register_blueprint(ciumod, url_prefix=f'{modulo0}/ciudad')
 app.register_blueprint(paimod, url_prefix=f'{modulo0}/pais')
-app.register_blueprint(naciomod, url_prefix=f'{modulo0}/nacionalidad')
-app.register_blueprint(carmod, url_prefix=f'{modulo0}/cargo')
-app.register_blueprint(permod, url_prefix=f'{modulo0}/persona')
+app.register_blueprint(persomod, url_prefix=f'{modulo0}/persona')
 app.register_blueprint(estumod, url_prefix=f'{modulo0}/estudiante')
-app.register_blueprint(promod, url_prefix=f'{modulo0}/programa')
 app.register_blueprint(profemod, url_prefix=f'{modulo0}/profesor')
-app.register_blueprint(matmod, url_prefix=f'{modulo0}/matricula')
-app.register_blueprint(notamod, url_prefix=f'{modulo0}/nota')
-app.register_blueprint(hormod, url_prefix=f'{modulo0}/horario')
-app.register_blueprint(evamod, url_prefix=f'{modulo0}/evaluacion')
-app.register_blueprint(asigmod, url_prefix=f'{modulo0}/asignatura')
-app.register_blueprint(curmod, url_prefix=f'{modulo0}/curso')
 app.register_blueprint(facumod, url_prefix=f'{modulo0}/facultad')
 app.register_blueprint(carremod, url_prefix=f'{modulo0}/carrera')
 app.register_blueprint(examod, url_prefix=f'{modulo0}/examen')
@@ -58,18 +40,9 @@ from app.rutas.referenciales.sucursal.sucursal_api import sucapi
 from app.rutas.gestionar_compras.registrar_pedido_compras.registrar_pedido_compras_api \
     import pdcapi
 from app.rutas.referenciales.pais.pais_api import paisapi
-from app.rutas.referenciales.nacionalidad.nacionalidad_api import nacioapi
-from app.rutas.referenciales.cargo.cargo_api import carapi
-from app.rutas.referenciales.persona.persona_api import perapi
+from app.rutas.referenciales.persona.persona_api import persona_api
 from app.rutas.referenciales.estudiante.estudiante_api import estudiante_api
-from app.rutas.referenciales.programa.programa_api import programa_api
-from app.rutas.referenciales.profesor.profesor_api import profesorapi
-from app.rutas.referenciales.matricula.matricula_api import matricula_api
-from app.rutas.referenciales.nota.nota_api import notaapi
-from app.rutas.referenciales.horario.horario_api import horarios_api
-from app.rutas.referenciales.evaluacion.evaluacion_api import evaluacion_api
-from app.rutas.referenciales.asignatura.asignatura_api import asignatura_api
-from app.rutas.referenciales.curso.curso_api import cursos_api
+from app.rutas.referenciales.profesor.profesor_api import profesor_api
 from app.rutas.referenciales.facultad.facultad_api import facultad_api
 from app.rutas.referenciales.carrera.carrera_api import carrera_api
 from app.rutas.referenciales.examen.examen_api import tipo_examen_api
@@ -81,18 +54,9 @@ apiversion1 = '/api/v1'
 app.register_blueprint(ciuapi, url_prefix=apiversion1)
 app.register_blueprint(sucapi, url_prefix=apiversion1)
 app.register_blueprint(paisapi, url_prefix=apiversion1)
-app.register_blueprint(nacioapi, url_prefix=apiversion1)
-app.register_blueprint(carapi, url_prefix=apiversion1)
-app.register_blueprint(perapi, url_prefix=apiversion1)
+app.register_blueprint(persona_api, url_prefix=apiversion1)
 app.register_blueprint(estudiante_api, url_prefix=apiversion1)
-app.register_blueprint(programa_api, url_prefix=apiversion1)
-app.register_blueprint(profesorapi, url_prefix=apiversion1)
-app.register_blueprint(matricula_api, url_prefix=apiversion1)
-app.register_blueprint(notaapi, url_prefix=apiversion1)
-app.register_blueprint(horarios_api, url_prefix=apiversion1)
-app.register_blueprint(evaluacion_api, url_prefix=apiversion1)
-app.register_blueprint(asignatura_api, url_prefix=apiversion1)
-app.register_blueprint(cursos_api, url_prefix=apiversion1)
+app.register_blueprint(profesor_api, url_prefix=apiversion1)
 app.register_blueprint(facultad_api, url_prefix=apiversion1)
 app.register_blueprint(carrera_api, url_prefix=apiversion1)
 app.register_blueprint(tipo_examen_api, url_prefix=apiversion1)
